@@ -62,17 +62,17 @@ Route::middleware(['cache.notification'])->group(function () {
     Route::get('/search-group-training', [HomeController::class, 'searchGroupTraining'])->name('searchGroupTraining');
 });
 
-////exchange
-//
-////product
-//Route::get('exchange', [ExchangeController::class, 'index'])->name('exchange.home');
-//Route::get('/product/{slug}', [ExchangeController::class, 'productDetail'])->name('exchange.productDetail');
-//Route::get('/category/{slug}', [ExchangeController::class, 'categoryDetail'])->name('exchange.categoryDetail');
-//Route::get('/search', [ExchangeController::class, 'search'])->name('products.search');
-//Route::get('/filter-by', [ExchangeController::class, 'filter'])->name('products.searchInProduct');
-//Route::get('/products/load-more', [ExchangeController::class, 'loadMore'])->name('exchange.loadMore');
-//Route::get('/product-new', [ExchangeController::class, 'createProductNews'])->name('exchange.productSale');
-//Route::get('/product-new/{slug}', [ExchangeController::class, 'editProductNews'])->name('exchange.editNews');
+//exchange
+
+//product
+Route::get('exchange', [ExchangeController::class, 'index'])->name('exchange.home');
+Route::get('/product/{slug}', [ExchangeController::class, 'productDetail'])->name('exchange.productDetail');
+Route::get('/category/{slug}', [ExchangeController::class, 'categoryDetail'])->name('exchange.categoryDetail');
+Route::get('/search', [ExchangeController::class, 'search'])->name('products.search');
+Route::get('/filter-by', [ExchangeController::class, 'filter'])->name('products.searchInProduct');
+Route::get('/products/load-more', [ExchangeController::class, 'loadMore'])->name('exchange.loadMore');
+Route::get('/product-new', [ExchangeController::class, 'createProductNews'])->name('exchange.productSale');
+Route::get('/product-new/{slug}', [ExchangeController::class, 'editProductNews'])->name('exchange.editNews');
 
 
 Route::middleware(['auth:sanctum'])->group(function () {

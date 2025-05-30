@@ -206,6 +206,10 @@
                             <a class="nav-link text-uppercase" href="{{ route('match') }}">{{ __('MATCH CENTER') }}</a>
                         </li>
 
+                        <li class="nav-item mx-2">
+                            <a class="nav-link text-uppercase" href="{{ route('exchange.home') }}">{{ __('exchange') }}</a>
+                        </li>
+
                         @if (Auth::check() && Auth::user()->role == 'admin')
                             <li class="nav-item mx-2" style="background: #312f2f;">
                                 <a class="nav-link text-uppercase" href="{{ route('dashboard') }}">{{ __('DASHBOARD') }}</a>

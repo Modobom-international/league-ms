@@ -38,8 +38,12 @@ class ExchangeController extends Controller
     public function index()
     {
         $products = $this->productRepository->homeExchange();
+        // 3. Recommend (gợi ý) – không trùng 2 mục trên
+        $newProductIds = $products->pluck('id')->toArray();
+        $excludeIds = array_merge($newProductIds);
+        $recommended = $this->productRepository->recommend($excludeIds);
         $categories = $this->categoryProductRepository->index();
-        return view('exchange.index', compact('products', 'categories'));
+        return view('exchange.index', compact('products', 'categories','recommended'));
     }
 
     public function productDetail($slug)

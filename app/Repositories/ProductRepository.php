@@ -100,7 +100,15 @@ class ProductRepository extends BaseRepository
 
     public function homeExchange()
     {
-        return $this->model->with('categories', 'brands')->where('status', 'accepted')->orderBy('created_at', 'desc')->paginate(6);
+        return $this->model->with('categories', 'brands')->where('status', 'accepted')->orderBy('created_at', 'desc') ->take(9)->get();
+    }
+
+    public function recommend($excludeIds)
+    {
+        return $this->model->with('categories', 'brands')->whereNotIn('id', $excludeIds)
+            ->inRandomOrder()
+            ->take(8)
+            ->get();
     }
 
     public function productNews($getNewsByStatus = null, $user)

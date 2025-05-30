@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Chợ Cầu Lông')</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body class="bg-gray-100">
-<header class="bg-gray-800 py-2 shadow-md">
-    <div class="mx-auto flex items-center justify-between px-4">
+<header class="bg-gray-800 py-2 shadow-md sticky top-0 shadow z-40">
+    <div class="mx-auto flex flex-wrap items-center justify-between px-4">
         <!-- Logo + Danh mục -->
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-4 w-full md:w-auto mb-2 md:mb-0">
             <a href="{{ route('exchange.home') }}" class="text-2xl font-bold text-white">Badminton Exchange</a>
 
             <!-- Danh mục (Dropdown) -->
@@ -27,12 +29,11 @@
                      class="absolute left-0 mt-2 w-64 bg-white shadow-lg rounded-lg z-50 hidden">
                     @foreach ($categories as $category)
                         <a href="{{ route('exchange.categoryDetail', $category['slug']) }}"
-                           class="block px-4 py-3 text-gray-700 hover:bg-gray-100 flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M4 6h16"></path>
-                            </svg>
-                            {{ $category->name }}
+                           class="block px-4 py-3 text-gray-700 hover:bg-gray-300 flex items-center">
+                            <img src="{{ asset($category->image) }}" id="mainImage" class="w-10 h-10 rounded-lg shadow-md mr-4">
+                            <span>
+                                  {{ $category->name }}
+                            </span>
                         </a>
                     @endforeach
                 </div>
@@ -40,31 +41,28 @@
         </div>
 
         <!-- Thanh tìm kiếm + Lọc theo khu vực -->
-        <form action="{{ route('products.search') }}" method="GET" class="w-full max-w-lg flex items-center">
-            <!-- Wrapper chứa cả dropdown và input -->
+        <form action="{{ route('products.search') }}" method="GET"
+              class="w-full md:w-auto max-w-lg flex flex-grow items-center mb-2 md:mb-0">
             <div class="flex border border-gray-300 rounded-lg overflow-hidden w-full">
-                <!-- Dropdown chọn khu vực -->
-                <select name="location" id="location-filter" class="px-3 py-2 bg-white text-gray-800 border-r border-gray-300">
-                    <option value="">{{ __('All Locations') }}</option>
-                    @foreach ($provinces as $province)
-                        <option value="{{ $province }}">{{ $province }}</option>
-                    @endforeach
-                </select>
+{{--                <select name="location" id="location-filter"--}}
+{{--                        class="px-3 py-2 bg-white text-gray-800 border-r border-gray-300">--}}
+{{--                    <option value="">{{ __('All Locations') }}</option>--}}
+{{--                    @foreach ($provinces as $province)--}}
+{{--                        <option value="{{ $province }}">{{ $province }}</option>--}}
+{{--                    @endforeach--}}
+{{--                </select>--}}
 
-                <!-- Ô nhập tìm kiếm -->
                 <input type="text" name="q" placeholder="{{ 'Search product...' }}"
                        class="w-full px-4 py-2 outline-none">
 
-                <!-- Nút tìm kiếm -->
                 <button class="bg-yellow-500 px-4 py-2 text-white font-bold">
                     🔍
                 </button>
             </div>
         </form>
 
-
         <!-- Tiện ích & User -->
-        <div class="flex items-center space-x-4 text-white">
+        <div class="flex items-center space-x-4 text-white w-full md:w-auto justify-end">
             <button id="notification-btn" class="relative bg-gray-200 p-2 rounded-full">
                 🔔
                 <span id="notification-count"
@@ -73,61 +71,54 @@
                 </span>
             </button>
 
-            <a href="{{route('exchange.managerNews')}}"><button>📋 {{'Manager news'}}</button></a>
+            <a href="{{route('exchange.managerNews')}}">
+                <button>📋 {{'Manager news'}}</button>
+            </a>
 
             @auth
-
-                <!-- Wrapper -->
-                    <div class="relative inline-block text-left" id="user-dropdown-wrapper">
-                        <!-- Nút avatar + tên -->
-                        <button id="user-toggle-btn" class="flex items-center space-x-2 hover:text-yellow-500">
-                            <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}" class="w-8 h-8 rounded-full border" alt="User Avatar">
-                            <span class="font-semibold text-white-800 ">{{ Auth::user()->name }}</span>
-                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-
-                        <!-- Dropdown content -->
-                        <div id="user-dropdown"
-                             class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl z-50 p-4 space-y-4">
-                            <!-- Info -->
-                            <div class="flex items-center space-x-3 border-b pb-3">
-                                <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}" class="w-12 h-12 rounded-full border">
-                                <div>
-                                    <p class="font-semibold text-gray-800">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-gray-500">⭐ 0.0 | 0 người theo dõi</p>
-                                    <p class="text-xs text-gray-400">TK: C0882xxxxx</p>
-                                </div>
-                            </div>
-
-                            <!-- Quản lý đơn hàng -->
+                <div class="relative inline-block text-left" id="user-dropdown-wrapper">
+                    <button id="user-toggle-btn" class="flex items-center space-x-2 hover:text-yellow-500">
+                        <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
+                             class="w-8 h-8 rounded-full border" alt="User Avatar">
+                        <span class="font-semibold text-white-800">{{ Auth::user()->name }}</span>
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="user-dropdown"
+                         class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl z-50 p-4 space-y-4">
+                        <div class="flex items-center space-x-3 border-b pb-3">
+                            <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
+                                 class="w-12 h-12 rounded-full border">
                             <div>
-                                <h4 class="text-base font-bold text-gray-600 mb-1">Quản lý đơn hàng</h4>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <a href="#" class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">🛒 Đơn mua</a>
-                                    <a href="#" class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">📦 Đơn bán</a>
-                                </div>
-                            </div>
-
-                            <!-- Dịch vụ trả phí -->
-                            <div>
-                                <h4 class="text-base font-bold text-gray-600 mb-1">Dịch vụ khác</h4>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <a href="{{route('exchange.profile' )}}" class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">🧑‍Thông tin cá nhân</a>
-                                    <a href="#" class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">❤ Trợ giúp</a>
-                                </div>
-                            </div>
-
-                            <!-- Logout -->
-                            <div class="text-center pt-2 border-t">
-                                <a href="{{ route('logout') }}">
-                                    <button class="text-red-500 hover:underline text-base">Đăng xuất</button>
-                                </a>
+                                <p class="font-semibold text-gray-800">{{ Auth::user()->name }}</p>
+                                <p class="text-xs text-gray-500">⭐ 0.0 | 0 người theo dõi</p>
+                                <p class="text-xs text-gray-400">TK: C0882xxxxx</p>
                             </div>
                         </div>
+                        <div>
+                            <h4 class="text-base font-bold text-gray-600 mb-1">Quản lý đơn hàng</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="#" class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">🛒 Đơn mua</a>
+                                <a href="#" class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">📦 Đơn bán</a>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-bold text-gray-600 mb-1">Dịch vụ khác</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="{{route('exchange.profile')}}"
+                                   class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">🢁‍ Thông tin cá nhân</a>
+                                <a href="#" class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">❤ Trợ giúp</a>
+                            </div>
+                        </div>
+                        <div class="text-center pt-2 border-t">
+                            <a href="{{ route('logout') }}">
+                                <button class="text-red-500 hover:underline text-base">Đăng xuất</button>
+                            </a>
+                        </div>
                     </div>
+                </div>
                 <a href="{{ route('exchange.productSale') }}"
                    class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold">
                     + {{'POST NEW'}}
@@ -150,7 +141,34 @@
 </div>
 
 </body>
+<!-- footer -->
+<div class="container mx-auto py-8 px-4 gap-6">
+    <div class="wrapper-copyright">
+        <div class="container">
+            <div class="w-full md:w-10/12 mx-auto text-center">
+                <img
+                    src="{{ asset('/images/MOBOBOM.png') }}"
+                    alt="Modobom Logo"
+                    class="mx-auto mb-4"
+                    style="max-width: 150px;"
+                >
+                <p class="text-base md:text-lg text-gray-700">
+                    <strong>badminton exchange</strong> is a brand in the key project
+                    <a href="https://vnisocial.com/" class="text-red-600 underline hover:text-red-800 transition">
+                        VNISOCIAL ECOSYSTEM
+                    </a>
+                    of international company
+                    <a href="https://modobom.com/" class="text-red-600 underline hover:text-red-800 transition">
+                        Modobom
+                    </a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer class="bg-gray-800 text-white mt-10">
+
     <div class="container mx-auto py-8 px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Cột 1: Logo & Giới thiệu -->
         <div>
