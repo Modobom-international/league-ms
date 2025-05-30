@@ -162,16 +162,21 @@
         <!-- Sản phẩm liên quan -->
         <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-bold mb-4">{{'Related products'}}</h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 @foreach($relatedProducts as $related)
-                    <div class="border rounded-lg p-2">
-                        <a href="{{route('exchange.productDetail', $related['slug'])}}">
-                            <img src="{{ asset($related->images) }}" class="w-full rounded">
-                            <h3 class=" font-semibold mt-2">{{ $related->name }}</h3>
-                            <p class=" text-gray-500 font-semibold mt-2">{{ $product->condition }} </p>
-                            <p class="text-red-500 font-bold">{{ number_format($product->price, 0, ',', '.') }} đ</p>
-                            <div class="flex items-center text-gray-500  mt-2">
-                                <p class=" text-gray-500 font-semibold mt-2">{{ $product->location }}</p>
+                    <div class="border rounded-lg p-3 flex flex-col h-full shadow-sm hover:shadow-md transition">
+                        <a href="{{ route('exchange.productDetail', $related['slug']) }}" class="flex flex-col h-full">
+                            {{-- Ảnh --}}
+                            <div class="w-full h-40 overflow-hidden rounded">
+                                <img src="{{ asset($related->images) }}" class="w-full h-full object-cover" alt="{{ $related->name }}">
+                            </div>
+
+                            {{-- Nội dung --}}
+                            <div class="flex flex-col justify-between flex-grow mt-3 space-y-1">
+                                <h3 class="text-base font-semibold line-clamp-2">{{ $related->name }}</h3>
+                                <p class="text-gray-500 text-sm">{{ $related->condition === 'new' ? 'Mới' : 'Đã sử dụng' }}</p>
+                                <p class="text-red-500 font-bold">{{ number_format($related->price, 0, ',', '.') }} đ</p>
+                                <p class="text-sm text-gray-600">📍 {{ $related->location }}</p>
                             </div>
                         </a>
                     </div>

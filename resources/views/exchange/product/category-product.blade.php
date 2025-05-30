@@ -13,52 +13,117 @@
         font-size: 18px;
         font-weight: 700;
     }
+
+    .top-16 {
+        top: 3.5rem !important;
+    }
+
+    span {
+        font-weight: 400 !important;
+    }
+
+    strong {
+        font-weight: 400 !important;
+    }
+
 </style>
 @section('content')
-    <div>
-        <img class=" relative w-full  bg-cover bg-center flex items-center justify-center text-white" src="{{ asset('images/exchange/banner.jpg') }}">
+    <!-- Thanh lọc sản phẩm dạng sticky -->
+    <div class="sticky top-16 z-40 bg-white border-b">
+        <div class="container mx-auto px-4">
+            <form action="{{ route('exchange.categoryDetail', $category->slug) }}" method="GET" class="w-full">
+                <div class="flex flex-wrap gap-3 py-3 items-center">
+                    <input type="hidden" name="slug" value="{{ $category->slug }}">
+                    <!-- Location Filter -->
+                    <select name="location" class="w-96 px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">{{__("Location")}}</option>
+                        @foreach ($provinces as $province)
+                            <option value="{{ $province }}" {{ request('location') == $province ? 'selected' : '' }}>
+                                {{ $province }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <!-- Condition Filter -->
+                    <select name="condition" class="w-96 px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">{{"Condition"}}</option>
+                        <option value="new" {{ request('condition') == 'new' ? 'selected' : '' }}>{{__("New")}}</option>
+                        <option value="used" {{ request('condition') == 'used' ? 'selected' : '' }}>{{__("Use")}}</option>
+                    </select>
+
+                    {{-- Sort Filter --}}
+                    <select name="sort" class="w-96 px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">{{__('Arrange')}}</option>
+                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>{{__("Low")}} → {{__("High")}}</option>
+                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>{{__("High")}} → {{__("Low")}}</option>
+                    </select>
+
+                    <!-- Search Button -->
+                    <button type="submit"
+                        class="px-6 py-2 bg-gray-500 text-white  rounded-xl hover:bg-gray-500 transition">
+                        <i class="fas fa-filter text-white-500 mr-2"></i> {{__("Filter")}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 text-gray-600 mt-4  mb-4">
+        <a href="{{ route('exchange.home') }}" class="hover:underline">{{'Homepage'}}</a> >
+        <span style="font-weight: 700 !important; ">{{ $category->name }}</span>
     </div>
     <div class="container mx-auto px-4">
-        <!-- Thanh tìm kiếm -->
-        <!-- Danh mục sản phẩm -->
-        <div class="widget-header">
-            <h2 class="widget-title">
-                <a href="" title="Áo thể thao"> {{'Category'}} </a></h2>
-        </div>
-        <div class="mt-6 grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-            @foreach($categories as $category)
-                <a href="{{route('exchange.categoryDetail', $category['slug'])}}" class="bg-white p-4 rounded-lg shadow-md">
-                    <img src="{{asset($category->image)}}" class="mx-auto w-16">
-                    <p class="mt-2 font-bold">{{$category->name}}</p>
-                </a>
-            @endforeach
-        </div>
+        <div class="mt-4">
+            <div class="w-full lg:w-[70%] space-y-4">
+                @if (isset($products) && count($products) > 0)
+                    @foreach ($products as $product)
+                        <div class="border rounded-xl shadow-sm hover:shadow-md transition flex overflow-hidden p-5">
+                            <!-- Hình ảnh -->
+                            <div class="w-32 sm:w-40 md:w-48 h-28 sm:h-32 md:h-36 flex-shrink-0">
+                                <img src="{{ asset($product->images) }}" alt="{{ $product->name }}"
+                                     class="w-full h-full object-cover rounded-l-xl">
+                            </div>
 
-        <!-- Sản phẩm nổi bật -->
-        <div class="widget-header mt-4">
-            <h2 class="widget-title">
-                <a href="https://shop.myleague.vn/ao-the-thao.html" title="Áo thể thao">{{'New Products'}} </a></h2>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-            @if(isset($categoryProduct)  && count($categoryProduct->products) > 0)
-            @foreach ($categoryProduct->products as $product)
-                <div class="bg-white p-6 rounded-lg shadow-md hover:scale-105">
-                    <a href="{{route('exchange.productDetail', $product['slug'])}}">
-                        <img src="{{ asset($product->images) }}" class=" w-full  object-cover rounded-lg">
-                        <h4 class="mt-2 font-semibold">{{ $product->name }}</h4>
-                    </a>
-                    <p class="text-gray-600">{{ $product->condition }} </p>
-                    <p class="text-red-500 font-bold">{{ number_format($product->price, 0, ',', '.') }} đ</p>
-                    <div class="flex items-center text-gray-500 text-sm mt-2">
-                        <i class="fas fa-map-marker-alt"></i> {{ $product->location }}
-                    </div>
-                </div>
-            @endforeach
+                            <!-- Nội dung -->
+                            <div class="flex flex-col justify-between p-3 w-full">
+                                <!-- Nhãn VIP hoặc Tin thường -->
+
+
+                                <!-- Tên sản phẩm + giá -->
+                                <div>
+                                    <a href="{{ route('exchange.productDetail', $product->slug) }}"
+                                       class="block font-semibold text-xl text-gray-900 hover:text-yellow-500 line-clamp-1 text-xxl">
+                                        {{ $product->name }}
+                                    </a>
+                                    <h2 class="text-red-600 font-bold text-xl mt-1">
+                                        {{ is_numeric($product->price) ? number_format($product->price, 0, ',', '.') . ' đ' : $product->price }}
+                                    </h2>
+                                </div>
+
+                                <!-- Mô tả ngắn -->
+                                <p class="">
+                                    {{ Str::limit(strip_tags($product->description), 100, '...') }}
+                                </p>
+
+                                <!-- Địa điểm -->
+                                <span class="mt-2">
+
+                                <i class="fas fa-clock text-gray-500 mr-2"></i>
+                                {{ __('Updated') }} {{ $product->updated_at->diffForHumans() }} 📍 {{ $product->location }}
+                            </span>
+                            </div>
+                        </div>
+                    @endforeach
                 @else
                     <div class="text-center">
-                        <h4 >{{ __('No products found') }}</h4>
+                        <h4>{{ __('No products found') }}</h4>
                     </div>
                 @endif
+            </div>
+
+        </div>
+        <div class="mt-6 flex justify-center">
+            {{ $products->onEachSide(1)->links('exchange.paginate.custom-paginate') }}
         </div>
     </div>
 @endsection

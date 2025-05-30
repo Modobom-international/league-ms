@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
+use App\Models\CategoryProduct;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+
 
 class ExchangeController extends Controller
 {
@@ -35,10 +37,17 @@ class ExchangeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = $this->productRepository->homeExchange();
-        // 3. Recommend (gợi ý) – không trùng 2 mục trên
+        $keyword = $request->input('q');
+
+        // Nếu có từ khóa, thì ưu tiên hiển thị kết quả tìm kiếm
+        if ($keyword) {
+            $products = $this->productRepository->productSearch($keyword);
+        } else {
+            // Không có từ khóa thì load mặc định
+            $products = $this->productRepository->homeExchange();
+        }
         $newProductIds = $products->pluck('id')->toArray();
         $excludeIds = array_merge($newProductIds);
         $recommended = $this->productRepository->recommend($excludeIds);
@@ -49,7 +58,7 @@ class ExchangeController extends Controller
     public function productDetail($slug)
     {
         $categories = $this->categoryProductRepository->index();
-        $product =  $this->productRepository->productDetail($slug);
+        $product = $this->productRepository->productDetail($slug);
 
         if(!$product) {
             return redirect()->route('exchange.home')->with('success', 'Product not found!');
@@ -64,12 +73,23 @@ class ExchangeController extends Controller
      */
 
     //category
-    public function categoryDetail($slug)
+    public function categoryDetail($slug, Request $request)
     {
         $categories = $this->categoryProductRepository->index();
-        $categoryProduct =  $this->categoryProductRepository->productCategory($slug);
+        $category = $this->categoryProductRepository->productCategory($slug);
 
-        return view('exchange.product.category-product', compact('categoryProduct', 'categories'));
+        // Tập hợp filter từ request
+        $filters = [
+            'location' => $request->input('location'),
+            'condition' => $request->input('condition'),
+            'sort' => $request->input('sort'),
+            'keyword' => $request->input('q'), // nếu có ô tìm kiếm
+        ];
+
+        $products = $this->productRepository->productFilter($category, $filters);
+
+
+        return view('exchange.product.category-product', compact('products', 'categories', 'category'));
     }
 
     public function search(Request $request)

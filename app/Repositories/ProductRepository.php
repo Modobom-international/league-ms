@@ -16,6 +16,11 @@ class ProductRepository extends BaseRepository
         return $this->model->with('categories', 'brands')->orderBy('created_at', 'desc')->get();
     }
 
+    public function productCategory($category)
+    {
+        return $this->model->with('categories', 'brands')->where('category', $category)->orderBy('created_at', 'desc')->paginate(10);
+    }
+
     public function productDetail($slug)
     {
         return $this->model->with( 'categories', 'productImages', 'users')->where('slug', $slug)->first();
@@ -46,12 +51,43 @@ class ProductRepository extends BaseRepository
         return $this->model->where('id', $id)->delete();
     }
 
-    public function productSearch($location, $keyword)
+    public function productFilter($category, $filters = [])
+    {
+        $query = $category->products();
+
+        if (!empty($filters['location'])) {
+            $query->where('location', 'LIKE', "%{$filters['location']}%");
+        }
+
+        if (!empty($filters['condition'])) {
+            $query->where('condition', $filters['condition']);
+        }
+
+        if (!empty($filters['keyword'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'LIKE', "%{$filters['keyword']}%")
+                    ->orWhere('description', 'LIKE', "%{$filters['keyword']}%");
+            });
+        }
+
+        if (!empty($filters['sort'])) {
+            if ($filters['sort'] === 'price_asc') {
+                $query->orderBy('price', 'asc');
+            } elseif ($filters['sort'] === 'price_desc') {
+                $query->orderBy('price', 'desc');
+            } else {
+                $query->latest();
+            }
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate(12)->withQueryString();
+    }
+
+    public function productSearch( $keyword)
     {
         return $this->model
-            ->when($location, function ($query, $location) {
-                return $query->where('location', 'LIKE', "%{$location}%");
-            })
             ->when($keyword, function ($query, $keyword) {
                 return $query->where('name', 'LIKE', "%{$keyword}%")
                     ->orWhere('description', 'LIKE', "%{$keyword}%");
