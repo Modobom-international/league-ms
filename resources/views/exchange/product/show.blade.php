@@ -154,7 +154,7 @@
 
                     <span class="text-gray-600">{{'Do you have similar products?'}}</span>
                 </div>
-                <a href="{{route('exchange.productSale')}}" class="text-orange-500 font-semibold"> {{'POST NEW'}}</a>
+                <a href="{{route('exchange.ProductNews')}}" class="text-orange-500 font-semibold"> {{'POST NEW'}}</a>
             </div>
 
         </div>

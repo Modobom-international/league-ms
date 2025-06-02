@@ -71,7 +71,7 @@ Route::get('/category/{slug}', [ExchangeController::class, 'categoryDetail'])->n
 Route::get('/search', [ExchangeController::class, 'search'])->name('products.search');
 Route::get('/filter-by', [ExchangeController::class, 'filter'])->name('products.searchInProduct');
 Route::get('/products/load-more', [ExchangeController::class, 'loadMore'])->name('exchange.loadMore');
-Route::get('/product-new', [ExchangeController::class, 'createProductNews'])->name('exchange.productSale');
+Route::get('/product-new', [ExchangeController::class, 'createProductNews'])->name('exchange.ProductNews');
 Route::get('/product-new/{slug}', [ExchangeController::class, 'editProductNews'])->name('exchange.editNews');
 
 
@@ -82,9 +82,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/update-product-news/{slug}', [ExchangeController::class, 'updateProductNews'])->name('exchange.updateNews');
     Route::delete('delete/product-news/{id}', [ExchangeController::class, 'destroy'])->name('product.destroy');
 
-    Route::post('/user/profile/{id}/', [ExchangeController::class, 'update'])->name('exchange.update');
-    Route::get('/user/profile/change-password/', [ExchangeController::class, 'changePassword'])->name('exchange.changePassword');
-    Route::post('/user/profile/update-password/', [ExchangeController::class, 'updatePassword'])->name('exchange.updatePassword');
+    Route::post('/profile/{id}/', [ExchangeController::class, 'update'])->name('exchange.update');
+    Route::get('/profile/change-password/', [ExchangeController::class, 'changePassword'])->name('exchange.changePassword');
+    Route::post('/profile/update-password/', [ExchangeController::class, 'updatePassword'])->name('exchange.updatePassword');
 });
 //profile
 

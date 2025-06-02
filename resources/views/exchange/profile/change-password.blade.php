@@ -1,38 +1,69 @@
 @extends('layouts.app')
-<!-- Summernote CSS -->
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Summernote CSS -->
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-
-<!-- Summernote JS -->
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
 @section('content')
-    <!DOCTYPE html>
-    <html lang="vi">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Hồ sơ cá nhân</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-    <body class="bg-gray-100 text-sm text-gray-800">
 
-    <div class="max-w-6xl mx-auto p-4 mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="flex gap-6 p-6 bg-gray-100">
         <!-- Sidebar -->
-        <aside class="bg-white rounded shadow p-4">
-            <ul class="space-y-4 font-medium">
-                <li><a href="{{route('exchange.profile')}}" class="text-yellow-500">Thông tin cá nhân</a></li>
-                <li><a href="{{route('exchange.changePassword')}}">Cài đặt tài khoản</a></li>
+        <div class="w-80 bg-white shadow-md rounded-md overflow-hidden text-lg">
+            <!-- Thông tin người dùng -->
+            <div class="p-4 text-center border-b">
+                <li class="p-3 flex items-center gap-2 text-black-500">
+                    <img src="{{ Auth::user()->profile_photo_path ? asset(Auth::user()->profile_photo_path) : asset('/images/no-image.png') }}"
+                         alt="Avatar" width="40" height="40" class="rounded-full me-2" /> {{ Auth::user()->name }}
+                </li>
+            </div>
+            <!-- Tiện ích -->
+            <div class="bg-gray-100 px-4 py-2 text-black-600 text-xm font-semibold">{{__(' Utilities')}}</div>
+            <ul class="divide-y">
+                <a href="{{ route('exchange.managerNews') }}">
+                    <li
+                        class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
+                        <i class="fas fa-file-alt"></i>{{__('News management')}}
+                    </li>
+                </a>
+                <li
+                    class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
+                    <i class="fas fa-clock"></i> {{__('Transaction History')}}
+                </li>
             </ul>
-        </aside>
 
-        <!-- Form chính -->
+            <!-- Cá nhân -->
+            <div class="bg-gray-100 px-4 py-2 text-black-600 text-xm font-semibold">{{__('Profile')}} </div>
+            <ul class="divide-y">
+                <li
+                    class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
+                    <i class="fas fa-heart"></i>{{__(' Favorite news')}}
+                </li>
+                <li
+                    class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
+                    <i class="fas fa-search"></i>{{__(' Saved searches')}}
+                </li>
+                <a href="{{ route('exchange.profile') }}">
+                    <li
+                        class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
+                        <i class="fas fa-info-circle"></i>{{__('Account information')}}
+                    </li>
+                </a>
+                <a href="{{ route('exchange.changePassword') }}">
+                    <li
+                        class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
+                        <i class="fas fa-lock"></i>{{__('Change Password')}}
+                    </li>
+                </a>
+                <a href="{{ route('logout') }}">
+                    <li
+                        class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
+                        <i class="fas fa-sign-out-alt"></i> {{__("Log out")}}
+                    </li>
+                </a>
+            </ul>
+        </div>
+        <div class="container mx-auto mx-auto  ">
+
             <form action="{{ route('update-password') }}" method="POST" class="md:col-span-3 bg-white rounded shadow p-6 space-y-6" >
                 @csrf
-                <h2 class="text-xl font-semibold">Hồ sơ cá nhân</h2>
+                <h2 class="text-xl font-semibold">{{__('Change Password')}}</h2>
                 @if (session('status'))
                     <div class="mb-4 text-green-600 text-base font-medium">
                         {{ session('status') }}
@@ -40,7 +71,7 @@
                 @endif
 
                 <div class="mb-4">
-                    <label for="oldPasswordInput" class="block text-black-700 font-semibold mb-1">Mật khẩu cũ</label>
+                    <label for="oldPasswordInput" class="block text-black-700 font-semibold mb-1">{{__('Old password')}}</label>
                     <input name="old_password" type="password" id="oldPasswordInput"
                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('old_password') border-red-500 @enderror">
                     @error('old_password')
@@ -55,7 +86,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="newPasswordInput" class="block text-black-700 font-semibold mb-1">Mật khẩu mới</label>
+                    <label for="newPasswordInput" class="block text-black-700 font-semibold mb-1">{{__('New Password')}}</label>
                     <input name="new_password" type="password" id="newPasswordInput"
                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('new_password') border-red-500 @enderror">
                     @error('new_password')
@@ -64,22 +95,21 @@
                 </div>
 
                 <div class="mb-6">
-                    <label for="confirmNewPasswordInput" class="block text-black-700 font-semibold mb-1">Xác nhận mật khẩu mới</label>
+                    <label for="confirmNewPasswordInput" class="block text-black-700 font-semibold mb-1">{{__('Confirm new password')}}</label>
                     <input name="new_password_confirmation" type="password" id="confirmNewPasswordInput"
                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
-                <div class="text-right">
+                <div class="text-center">
                     <button type="submit"
-                            class="bg-yellow-400 text-white px-6 py-2 rounded hover:bg-yellow-500 transition">
-                        Lưu thay đổi
+                            class="bg-orange-400 text-white px-6 py-2 rounded hover:bg-yellow-500 transition">
+                        {{__('Save')}}
                     </button>
                 </div>
             </form>
 
+        </div>
+        <!-- Form chính -->
+
     </div>
-
-    </body>
-    </html>
-
 @endsection

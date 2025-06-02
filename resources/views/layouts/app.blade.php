@@ -20,7 +20,7 @@
                 <!-- Danh mục (Dropdown) -->
                 <div class="relative">
                     <button id="category-btn"
-                        class="px-4 py-2 bg-yellow-500 text-white font-bold rounded flex items-center">
+                        class="px-4 py-2 bg-gray-500 text-white font-bold rounded flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16m-7 6h7"></path>
@@ -47,7 +47,7 @@
                 class="w-full md:w-auto max-w-lg flex flex-grow items-center mb-2 md:mb-0">
                 <div class="flex border border-gray-300 rounded-lg overflow-hidden w-full">
                     <input type="text" name="q" placeholder="{{ 'Search product...' }}"
-                        class="w-full px-4 py-2 outline-none">
+                        class="w-full px-4 py-2 outline-none" value="{{ request('q') }}">
                     <button class="bg-gray-500 px-4 py-2 text-white font-bold">
                         <i class="fas fa-search text-white-500 mr-2"></i>
                     </button>
@@ -118,7 +118,7 @@
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('exchange.productSale') }}"
+                    <a href="{{ route('exchange.ProductNews') }}"
                         class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold">
                         + {{ 'POST NEW' }}
                     </a>

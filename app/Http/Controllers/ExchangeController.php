@@ -170,7 +170,18 @@ class ExchangeController extends Controller
         $user = Auth::user();
         $categories = $this->categoryProductRepository->index();
         $getNewsByStatus = $request->get('status');
-        $productNews = $this->productRepository->productNews($getNewsByStatus, $user->id);
+        $keyword = $request->input('q');
+
+        // Nếu có từ khóa, thì ưu tiên hiển thị kết quả tìm kiếm
+        if ($keyword) {
+            $productNews = $this->productRepository->productNews($getNewsByStatus, $user->id, $keyword);
+
+        } else {
+            // Không có từ khóa thì load mặc định
+            $productNews = $this->productRepository->productNews($getNewsByStatus, $user->id);
+
+        }
+
         $countProductByStatus = $this->productRepository->countProduct($user->id);
 
         return view('exchange.manager-news.index', compact('categories', 'productNews', 'countProductByStatus'));

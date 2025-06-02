@@ -147,29 +147,36 @@ class ProductRepository extends BaseRepository
             ->get();
     }
 
-    public function productNews($getNewsByStatus = null, $user)
+    public function productNews($getNewsByStatus = null, $user, $keyword = null)
     {
+        $query = $this->model->with('categories', 'brands')
+            ->where('user_id', $user)
+            ->orderBy('start_date', 'asc');
 
+        // Lọc theo trạng thái
         if ($getNewsByStatus == 'accepted') {
-            return $this->model->with('categories', 'brands')->where('status', 'accepted')
-            ->where('user_id', $user)
-            ->orderBy('start_date', 'asc')->get();
+            $query->where('status', 'accepted');
         } elseif ($getNewsByStatus == 'pending') {
-            return $this->model->with('categories', 'brands')->where('status', 'pending')
-                ->where('user_id', $user)
-                ->orderBy('start_date', 'asc')->get();
+            $query->where('status', 'pending');
         } elseif ($getNewsByStatus == 'rejected') {
-            return $this->model->with('categories', 'brands')->where('status', 'rejected')
-                ->where('user_id', $user)
-                ->orderBy('start_date', 'asc')->get();
+            $query->where('status', 'rejected');
+        } else {
+            $query->where('status', 'accepted');
         }
-        return $this->model->with('categories', 'brands')->where('status', 'accepted')
-            ->where('user_id', $user)
-            ->orderBy('start_date', 'asc')->get();
 
+        // Lọc theo từ khóa (nếu có)
+        if (!empty($keyword)) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
+        }
+
+        return $query->paginate(5); // Phân trang 5 sản phẩm mỗi trang
     }
 
-    public function countProduct($user)
+
+        public function countProduct($user)
     {
         return $this->model->where('user_id', $user)
             ->selectRaw("
