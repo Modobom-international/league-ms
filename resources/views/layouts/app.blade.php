@@ -7,6 +7,20 @@
     <title>@yield('title', 'Chợ Cầu Lông')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+
+    <!-- jQuery (bắt buộc) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <style>
+        .toast-top-right {
+            top: 60px !important; /* bạn chỉnh số px tùy ý */
+        }
+    </style>
+    <!-- Summernote CSS -->
 
 </head>
 
@@ -63,7 +77,9 @@
                         0
                     </span>
                 </button>
-
+                <a href="{{route('chat.listChat')}}" id="notification-btn" class="relative bg-gray-200 p-2 rounded-full">
+                    💬
+                </a>
                 <a href="{{ route('exchange.managerNews') }}">
                     <button>📋 {{ 'Manager news' }}</button>
                 </a>
@@ -129,12 +145,6 @@
                 </div>
             </div>
         </header>
-        @if (session('success'))
-            <div id="alert-success"
-                class="fixed top-5 right-5 bg-green-500 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-md transition-opacity duration-300">
-                {{ session('success') }}
-            </div>
-        @endif
         <div class="">
             @yield('content')
         </div>
@@ -177,11 +187,17 @@
             <div>
                 <h3 class="text-lg font-semibold text-white-400">{{ 'Link' }}</h3>
                 <ul class="mt-2 space-y-2 text-gray-400">
+                    <li><a href="{{ route('exchange.aboutUs') }}" class="hover:text-yellow-300">{{ 'About us' }}</a>
+                    </li>
+                    <li><a href="{{ route('exchange.rule') }}" class="hover:text-yellow-300">{{ 'Exchange Rules' }}</a>
+                    </li>
+                    <li><a href="{{ route('exchange.privacyPolicy') }}"
+                            class="hover:text-yellow-300">{{ 'Privacy Policy' }}</a>
+                    </li>
                     <li><a href="{{ route('exchange.home') }}" class="hover:text-yellow-300">{{ 'Homepage' }}</a>
                     </li>
                     <li><a href="{{ route('exchange.home') }}" class="hover:text-yellow-300">{{ 'Product' }}</a>
                     </li>
-                    <li><a href="#" class="hover:text-yellow-300">{{ 'News' }}</a></li>
                 </ul>
             </div>
 
@@ -208,6 +224,35 @@
     </footer>
 
     </html>
+    <script>
+        $(document).ready(function() {
+            @if (session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+
+            @if (session('error'))
+                toastr.error("{{ session('error') }}");
+            @endif
+
+            @if (session('warning'))
+                toastr.warning("{{ session('warning') }}");
+            @endif
+
+            @if (session('info'))
+                toastr.info("{{ session('info') }}");
+            @endif
+        });
+    </script>
+
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right", // Vị trí hiển thị
+            "timeOut": "5000"
+        };
+    </script>
+
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 
     <script>

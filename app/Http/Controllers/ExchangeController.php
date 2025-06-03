@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChatSend;
 use App\Http\Requests\UserRequest;
 use App\Models\CategoryProduct;
+use App\Models\Chatting;
+use App\Models\Conversation;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
@@ -53,6 +56,24 @@ class ExchangeController extends Controller
         $recommended = $this->productRepository->recommend($excludeIds);
         $categories = $this->categoryProductRepository->index();
         return view('exchange.index', compact('products', 'categories','recommended'));
+    }
+
+    public function aboutUs()
+    {
+        $categories = $this->categoryProductRepository->index();
+        return view('exchange.about-us', compact('categories'));
+    }
+
+    public function privacyPolicy()
+    {
+        $categories = $this->categoryProductRepository->index();
+        return view('exchange.privacy-policy', compact('categories'));
+    }
+
+    public function rule()
+    {
+        $categories = $this->categoryProductRepository->index();
+        return view('exchange.rule', compact('categories'));
     }
 
     public function productDetail($slug)
@@ -309,7 +330,6 @@ class ExchangeController extends Controller
 
     public function updatePassword(Request $request)
     {
-        dd(1);
         $request->validate([
             'old_password' => 'required',
             'new_password' => 'required|confirmed',
@@ -324,6 +344,146 @@ class ExchangeController extends Controller
         ]);
 
         return back()->with("status", __("Password successfully changed!"));
+    }
+
+    public function listChat()
+    {
+        $user = Auth::user();
+
+        $conversations = Conversation::where('buyer_id', $user->id)
+            ->orWhere('seller_id', $user->id)
+            ->with(['buyer', 'seller', 'messages' => function ($q) {
+                $q->latest()->limit(1); // chỉ lấy tin nhắn gần nhất cho preview
+            }])
+            ->orderByDesc(function ($query) {
+                $query->select('created_at')
+                    ->from('chattings')
+                    ->whereColumn('conversation_id', 'conversations.id')
+                    ->latest()
+                    ->limit(1);
+            })
+            ->get();
+        $categories = $this->categoryProductRepository->index();
+        return view('exchange.chat.list-chat', compact('conversations', 'categories'));
+    }
+
+    public function chatWithSeller($productId)
+    {
+        $product = Product::findOrFail($productId);
+        $user = Auth::user();
+
+        // Tìm conversation đã tồn tại (có thể là buyer hoặc seller)
+        $conversation = Conversation::where('product_id', $product->id)
+            ->where(function ($q) use ($user) {
+                $q->where('buyer_id', $user->id)
+                    ->orWhere('seller_id', $user->id);
+            })
+            ->first();
+        // Nếu chưa có thì tạo mới (chỉ nếu user không phải là chủ sản phẩm)
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'product_id' => $product->id,
+                'buyer_id' => $user->id,
+                'seller_id' => $product->user_id,
+            ]);
+        }
+
+        // Lấy danh sách tất cả cuộc trò chuyện liên quan đến user
+        $conversations = Conversation::where('buyer_id', $user->id)
+            ->orWhere('seller_id', $user->id)
+            ->with([
+                'buyer',
+                'seller',
+                'product',
+                'messages' => fn($q) => $q->latest()->limit(1)
+            ])
+            ->get()
+            ->sortByDesc(function ($conv) {
+                return optional($conv->messages->first())->created_at ?? $conv->created_at;
+            })
+            ->values(); // reset lại index
+
+        $messages = $conversation->messages()->orderBy('created_at')->get();
+        $categories = $this->categoryProductRepository->index();
+
+        return view('exchange.chat.show', compact(
+            'categories',
+            'conversation',
+            'product',
+            'conversations',
+            'messages',
+            'user'
+        ));
+    }
+
+    public function show(Conversation $conversation)
+    {
+        $user = Auth::user();
+
+        // Kiểm tra nếu user không liên quan thì chặn
+        if ($conversation->buyer_id !== $user->id && $conversation->seller_id !== $user->id) {
+            abort(403);
+        }
+
+        $allConversations = Conversation::where('buyer_id', $user->id)
+            ->orWhere('seller_id', $user->id)
+            ->with([
+                'buyer',
+                'seller',
+                'product',
+                'messages' => fn($q) => $q->latest()->limit(1)
+            ])
+            ->get();
+
+// Đưa current conversation lên đầu
+        $conversations = collect([$conversation])
+            ->merge(
+                $allConversations->filter(fn($conv) => $conv->id !== $conversation->id)
+                    ->sortByDesc(fn($conv) => optional($conv->messages->first())->created_at ?? $conv->created_at)
+            )
+            ->values(); // reset index
+
+        $messages = $conversation->messages()->orderBy('created_at')->get();
+        $categories = app(CategoryProductRepository::class)->index();
+
+        return view('exchange.chat.show', compact(
+            'categories',
+            'conversation',
+            'conversations',
+            'messages',
+            'user'
+        ));
+    }
+
+
+
+    public function send(Request $request, $conversationId)
+    {
+        $conversation = Conversation::findOrFail($conversationId);
+        $user = Auth::user();
+
+        $request->validate([
+            'content' => 'nullable|string',
+            'file' => 'nullable|image|max:2048', // chỉ cho phép ảnh < 2MB
+        ]);
+
+        if ($request->hasFile('file')) {
+            $image = $request->file('file');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('/images/upload/product/'), $imageName);
+            $input['file'] = '/images/upload/product/' . $imageName; // Lưu đường dẫn
+
+        }
+
+        $message = Chatting::create([
+            'conversation_id' => $conversation->id,
+            'user_id' => $user->id,
+            'content' => $request->input('content'),
+            'file' => $request->hasFile('file'),
+        ]);
+        broadcast(new ChatSend($message))->toOthers();
+
+        return back();
     }
 
 }

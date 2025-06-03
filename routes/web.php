@@ -63,9 +63,12 @@ Route::middleware(['cache.notification'])->group(function () {
 });
 
 //exchange
-
-//product
 Route::get('exchange', [ExchangeController::class, 'index'])->name('exchange.home');
+Route::get('exchange/about-us', [ExchangeController::class, 'aboutUs'])->name('exchange.aboutUs');
+Route::get('exchange/privacy-policy', [ExchangeController::class, 'privacyPolicy'])->name('exchange.privacyPolicy');
+Route::get('exchange/rule', [ExchangeController::class, 'rule'])->name('exchange.rule');
+//product
+
 Route::get('/product/{slug}', [ExchangeController::class, 'productDetail'])->name('exchange.productDetail');
 Route::get('/category/{slug}', [ExchangeController::class, 'categoryDetail'])->name('exchange.categoryDetail');
 Route::get('/search', [ExchangeController::class, 'search'])->name('products.search');
@@ -265,6 +268,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //exchange
     Route::get('/manager-news', [ExchangeController::class, 'managerNews'])->name('exchange.managerNews');
     Route::post('/store-product-news/', [ExchangeController::class, 'storeProductNews'])->name('product.storeProductSale');
+
+    //chatting
+    Route::get('/chat/product/{product}', [ExchangeController::class, 'chatWithSeller'])->name('chat.withSeller');
+    Route::get('/chat', [ExchangeController::class, 'listChat'])->name('chat.listChat');
+    Route::get('/chat/{conversation}', [ExchangeController::class, 'show'])->name('chat.show');
+    Route::post('/chat/{conversation}/send', [ExchangeController::class, 'send'])->name('chat.send');
 
 
 
