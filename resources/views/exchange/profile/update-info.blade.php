@@ -13,7 +13,7 @@
             <!-- Tiện ích -->
             <div class="bg-gray-100 px-4 py-2 text-black-600 text-xm font-semibold">{{__(' Utilities')}}</div>
             <ul class="divide-y">
-                <a href="{{ route('exchange.managerNews') }}">
+                <a href="{{ route('exchange.managerPosts') }}">
                     <li
                         class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
                         <i class="fas fa-file-alt"></i>{{__('News management')}}

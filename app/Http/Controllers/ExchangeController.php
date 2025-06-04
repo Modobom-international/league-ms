@@ -136,13 +136,13 @@ class ExchangeController extends Controller
         return view('exchange.product.search', compact('products', 'categories'));
     }
 
-    public function createProductNews()
+    public function postProduct()
     {
         $categories = $this->categoryProductRepository->index();
-        return view('exchange.manager-news.post-product', compact( 'categories'));
+        return view('exchange.manager-post.post-product', compact( 'categories'));
     }
 
-    public function storeProductNews(Request $request)
+    public function storePostProduct(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -184,10 +184,10 @@ class ExchangeController extends Controller
             }
         }
 
-        return redirect()->route('exchange.managerNews')->with('success', 'Post news created success!');
+        return redirect()->route('exchange.managerPosts')->with('success', 'Post news created success!');
     }
 
-    public function managerNews(Request $request)
+    public function managerPosts(Request $request)
     {
         $user = Auth::user();
         $categories = $this->categoryProductRepository->index();
@@ -206,20 +206,20 @@ class ExchangeController extends Controller
 
         $countProductByStatus = $this->productRepository->countProduct($user->id);
 
-        return view('exchange.manager-news.index', compact('categories', 'productNews', 'countProductByStatus'));
+        return view('exchange.manager-post.index', compact('categories', 'productNews', 'countProductByStatus'));
     }
 
-    public function editProductNews($slug)
+    public function editPostProduct($slug)
     {
         $categories = $this->categoryProductRepository->index();
         $product = $this->productRepository->productDetail($slug);
         if(!$product) {
             return redirect()->route('exchange.home')->with('success', 'Product not found!');
         }
-        return view('exchange.manager-news.edit-product', compact('product', 'categories'));
+        return view('exchange.manager-post.edit-product', compact('product', 'categories'));
     }
 
-    public function updateProductNews(Request $request, $slug)
+    public function updatePostProduct(Request $request, $slug)
     {
         $input = $request->except(['_token']);
         $dataProduct = $this->productRepository->productDetail($slug);
@@ -275,14 +275,14 @@ class ExchangeController extends Controller
             }
         }
 
-        return redirect()->route('exchange.managerNews')->with('success', 'Product updated successfully');
+        return redirect()->route('exchange.managerPosts')->with('success', 'Product updated successfully');
     }
 
      public function destroy($id)
      {
          $this->productRepository->destroy($id);
 
-         return redirect()->route('exchange.managerNews')->with('success', 'Product updated successfully');
+         return redirect()->route('exchange.managerPosts')->with('success', 'Product updated successfully');
      }
 
     public function loadMore(Request $request)

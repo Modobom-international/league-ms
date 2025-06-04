@@ -13,7 +13,7 @@
     <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow mt-4">
         <h2 class="text-xl font-bold mb-4">{{'New Post Product'}}</h2>
 
-        <form action="{{route('product.storeProductSale')}}" method="POST" enctype="multipart/form-data">
+        <form action="{{route('exchange.storePostProduct')}}" method="POST" enctype="multipart/form-data">
             @csrf
 
             {{-- Hình ảnh & Video sản phẩm --}}
@@ -82,11 +82,16 @@
                 @enderror
             </div>
 
-            <div class="mt-4">
-                <label class="block font-semibold">{{'Description'}}</label>
-                <textarea id="editor" name="description"></textarea>
+                <div class="mt-4">
+                    <label for="description" class="block font-semibold">{{ __('Description') }}</label>
+                    <textarea id="description" name="description"
+                              placeholder="{{ __("- Name product\n- Version, capacity, accessories if any\n- Origin/brand\n- Condition: for example: new, no scratches, 3-month warranty\n- Accept payment/shipping via Cho Tot\n- Warranty, maintenance, return policy for goods/products\n- Delivery address, return of goods/products") }}"
+                              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[200px]"></textarea>
 
-            </div>
+                    @error('description')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
                 @error('description')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror

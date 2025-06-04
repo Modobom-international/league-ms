@@ -29,7 +29,7 @@
             <!-- Tiện ích -->
             <div class="bg-gray-100 px-4 py-2 text-black-600 text-xm font-semibold">{{__(' Utilities')}}</div>
             <ul class="divide-y">
-                <a href="{{ route('exchange.managerNews') }}">
+                <a href="{{ route('exchange.managerPosts') }}">
                     <li
                         class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
                         <i class="fas fa-file-alt"></i>{{__('News management')}}
@@ -79,7 +79,7 @@
             <div class=" p-5 rounded-lg mb-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold">{{__('News management')}}</h2>
-                    <form action="{{ route('exchange.managerNews') }}" method="GET"
+                    <form action="{{ route('exchange.managerPosts') }}" method="GET"
                           class="w-full md:w-auto max-w-lg flex flex-grow items-center mb-2 md:mb-0">
                         <div class="flex border border-gray-300 rounded-lg overflow-hidden w-full">
                             <input type="text" name="q" placeholder="{{ 'Search product...' }}"
@@ -131,26 +131,26 @@
                                     {{ Str::limit(strip_tags($product->description), 100, '...') }}
                                 </p>
                                 <!-- Địa điểm -->
+
                                 <span class="mt-2">
-                                    <i class="fas fa-clock text-gray-500 mr-2"></i>
-                                    {{ __('Updated') }} {{ $product->updated_at->diffForHumans() }}
-                                </span>
-                                <span>
                                     📍
                                     {{ $product->location }}
                                 </span>
-
-                                <div class="flex gap-2 mt-2">
-                                    <a href="{{ route('exchange.editNews', $product['slug']) }}">
+                                <span class="mt-2">
+                                    <i class="fas fa-clock text-gray-500 mr-2"></i>
+                                    {{ __('Updated:') }} {{ $product->updated_at->diffForHumans() }}
+                                </span>
+                                <div class="flex gap-2 mt-2 justify-end">
+                                    <a href="{{ route('exchange.editPostProduct', $product['slug']) }}">
                                         <button
-                                            class="px-3 py-1 border border-gray-500 text-gray-500 rounded hover:bg-gray-500 hover:text-white transition">
-                                            {{__('Edit news')}}
+                                            class="px-3 py-1 border border-gray-500 text-black-600 font-semibold rounded hover:bg-gray-500 hover:text-white transition bg-gray">
+                                            {{ __('Edit post') }}
                                         </button>
                                     </a>
                                     <button
-                                        class="openDeleteModal px-3 py-1 border border-red-500 text-red-500 rounded hover:bg-red-500 hover:text-white transition"
+                                        class="openDeleteModal px-3 py-1 border border-gray-600 font-semibold text-red-500 rounded hover:bg-red-500 hover:text-white transition bg-red"
                                         data-url="{{ route('product.destroy', $product->id) }}">
-                                        {{__(' Delete post')}}
+                                        {{ __('Delete post') }}
                                     </button>
                                 </div>
                             </div>
@@ -162,9 +162,9 @@
 
                         <h2 class="text-xl font-semibold text-gray-800 mb-2">{{__('No posts found')}}</h2>
                         <p class="text-gray-500 mb-4">{{__('You currently have no news for this status')}}</p>
-                        <a href="{{ route('exchange.ProductNews') }}"
+                        <a href="{{ route('exchange.postProduct') }}"
                             class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-6 rounded-xl transition">
-                            {{__('Post news')}}
+                            {{__('Post new')}}
                         </a>
                     </div>
                 @endif
@@ -213,7 +213,7 @@
 <script>
     $(document).ready(function() {
         $('.status-product button').click(function() {
-            let url = '/manager-news?status=' +
+            let url = '/manager-posts?status=' +
                 $(this).data('id');
             window.location.href = url;
         });

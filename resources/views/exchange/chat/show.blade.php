@@ -68,7 +68,7 @@
                     @endphp
                     <li class="p-3 hover:bg-black-100 cursor-pointer border-t">
                         <a href="{{ route('chat.show', $conv->id) }}">
-                            <div class="flex items-center justify-between p-3">
+                            <div class="flex items-center justify-between ">
                                 <div class="flex ">
                                     <div>
                                         <img class="image w-[3rem] rounded-lg"
@@ -77,7 +77,7 @@
                                     </div>
                                     <div class="ml-4">
                                         <div class="font-semibold text-black-600">{{ $otherUser->name }}</div>
-                                        <div class="font-sm text-black-600">{{ Str::limit($conv->product->name, 30) }}</div>
+                                        <div class="font-sm text-black-600">{{ Str::limit($conv->product->name, 20) }}</div>
                                         <div class="text-sm text-gray-600">
                                             {{ Str::limit(optional($conv->messages->last())->content, 20) }}
                                         </div>
@@ -156,7 +156,7 @@
                     <div class="flex flex-wrap gap-2 mb-2">
                         @foreach (['Sản phẩm này còn không ạ?', 'Bạn có ship hàng không?', 'Bạn có những size nào?'] as $quickMsg)
                             <button type="button" onclick="insertQuickReply(`{{ $quickMsg }}`)"
-                                    class="bg-black-100 px-3 py-1 rounded-full text-sm">
+                                    class=" px-3 py-1 rounded-full text-sm bg-[##f5deb3]">
                                 {{ $quickMsg }}
                             </button>
                         @endforeach

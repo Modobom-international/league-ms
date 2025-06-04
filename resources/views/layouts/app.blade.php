@@ -93,9 +93,9 @@
                 <a href="{{route('chat.listChat')}}" id="notification-btn" class="relative bg-gray-200 p-2 rounded-full">
                     💬
                 </a>
-                <a href="{{ route('exchange.managerNews') }}" class="relative bg-gray-200 p-2 rounded-full">
+                <a href="{{ route('exchange.managerPosts') }}" class="relative bg-gray-200 p-2 rounded-full">
                     📋
-                    <button class="ma-news text-black"> {{ 'Manager news' }}</button>
+                    <button class="ma-news text-black"> {{ 'Manager posts' }}</button>
                 </a>
 
                 @auth
@@ -103,8 +103,8 @@
                         <button id="user-toggle-btn" class="flex items-center space-x-2 hover:text-yellow-500">
                             <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
                                 class="w-8 h-8 rounded-full border" alt="User Avatar">
-                            <span class="font-semibold text-white-800">{{ Auth::user()->name }}▼</span>
-                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span class="font-semibold text-white-800">{{ Auth::user()->name }}</span>
+                            <svg class="w-4 h-4 text-white-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
@@ -151,7 +151,7 @@
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('exchange.ProductNews') }}"
+                    <a href="{{ route('exchange.postProduct') }}"
                        class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold inline-block whitespace-nowrap">
                         + {{ __('POST NEW') }}
                     </a>

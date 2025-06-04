@@ -69,25 +69,14 @@ Route::get('exchange/privacy-policy', [ExchangeController::class, 'privacyPolicy
 Route::get('exchange/rule', [ExchangeController::class, 'rule'])->name('exchange.rule');
 //product
 
-Route::get('/product/{slug}', [ExchangeController::class, 'productDetail'])->name('exchange.productDetail');
+Route::get('/post/{slug}', [ExchangeController::class, 'productDetail'])->name('exchange.productDetail');
 Route::get('/category/{slug}', [ExchangeController::class, 'categoryDetail'])->name('exchange.categoryDetail');
 Route::get('/search', [ExchangeController::class, 'search'])->name('products.search');
 Route::get('/filter-by', [ExchangeController::class, 'filter'])->name('products.searchInProduct');
 Route::get('/products/load-more', [ExchangeController::class, 'loadMore'])->name('exchange.loadMore');
-Route::get('/product-new', [ExchangeController::class, 'createProductNews'])->name('exchange.ProductNews');
-Route::get('/product-new/{slug}', [ExchangeController::class, 'editProductNews'])->name('exchange.editNews');
-
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    //manager-news
-    Route::get('/user/profile', [ExchangeController::class, 'profile'])->name('exchange.profile');
 
-    Route::post('/update-product-news/{slug}', [ExchangeController::class, 'updateProductNews'])->name('exchange.updateNews');
-    Route::delete('delete/product-news/{id}', [ExchangeController::class, 'destroy'])->name('product.destroy');
-
-    Route::post('/profile/{id}/', [ExchangeController::class, 'update'])->name('exchange.update');
-    Route::get('/profile/change-password/', [ExchangeController::class, 'changePassword'])->name('exchange.changePassword');
-    Route::post('/profile/update-password/', [ExchangeController::class, 'updatePassword'])->name('exchange.updatePassword');
 });
 //profile
 
@@ -266,8 +255,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/reject-product', [ProductController::class, 'reject'])->name('product.reject');
 
     //exchange
-    Route::get('/manager-news', [ExchangeController::class, 'managerNews'])->name('exchange.managerNews');
-    Route::post('/store-product-news/', [ExchangeController::class, 'storeProductNews'])->name('product.storeProductSale');
+    Route::get('/user/profile', [ExchangeController::class, 'profile'])->name('exchange.profile');
+
+    Route::get('/post-product', [ExchangeController::class, 'postProduct'])->name('exchange.postProduct');
+    Route::get('/product/{slug}', [ExchangeController::class, 'editPostProduct'])->name('exchange.editPostProduct');
+
+    Route::post('/update-post-product/{slug}', [ExchangeController::class, 'updatePostProduct'])->name('exchange.updatePostProduct');
+    Route::delete('delete/post-product/{id}', [ExchangeController::class, 'destroy'])->name('product.destroy');
+
+    Route::post('/profile/{id}/', [ExchangeController::class, 'update'])->name('exchange.update');
+    Route::get('/me/change-password/', [ExchangeController::class, 'changePassword'])->name('exchange.changePassword');
+    Route::post('/profile/update-password/', [ExchangeController::class, 'updatePassword'])->name('exchange.updatePassword');
+
+    Route::get('/manager-posts', [ExchangeController::class, 'managerPosts'])->name('exchange.managerPosts');
+    Route::post('/store-post-product/', [ExchangeController::class, 'storePostProduct'])->name('exchange.storePostProduct');
 
     //chatting
     Route::get('/chat/product/{product}', [ExchangeController::class, 'chatWithSeller'])->name('chat.withSeller');

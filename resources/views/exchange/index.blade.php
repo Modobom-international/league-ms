@@ -103,7 +103,7 @@
                                     </div>
                                     <div class="p-3 space-y-1 flex-1 flex flex-col justify-between">
                                         <div>
-                                            <a href="{{ route('exchange.productDetail', $product['slug']) }}">
+                                            <a href="{{route('exchange.productDetail', $product->slug)}}">
                                                 <h3 class="product-title text-xl font-semibold line-clamp-2">
                                                     {{ $product->name }}</h3>
                                             </a>

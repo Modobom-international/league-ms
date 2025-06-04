@@ -7,6 +7,15 @@
     strong {
         font-weight: 400 !important;
     }
+
+    #mainImage {
+        transition: opacity 0.3s ease-in-out; /* Hiệu ứng mờ dần */
+    }
+    .thumbnail:hover {
+        border-color: #3b82f6; /* Đổi màu viền khi hover (tuỳ chọn) */
+        transform: scale(1.05); /* Phóng nhẹ ảnh nhỏ khi hover (tuỳ chọn) */
+        transition: all 0.2s ease;
+    }
 </style>
 @section('content')
     <div class="container mx-auto py-6 px-4">
@@ -20,15 +29,44 @@
         <div class="grid grid-cols-1 bg-white shadow-md md:grid-cols-2 gap-5 p-6">
             <!-- Hình ảnh sản phẩm -->
             <div>
+                <!-- Ảnh chính -->
                 <img src="{{ asset($product->images) }}" id="mainImage" class="w-full rounded-lg shadow-md">
+
+                <!-- Ảnh nhỏ bên dưới -->
                 <div class="flex space-x-2 mt-2">
-                    <img src="{{ asset($product->images) }}" onmouseover="changeMainImage('{{ asset($product->images) }}')" class="w-16 h-16 object-cover rounded border cursor-pointer">
+                    <!-- Ảnh chính cũng được hiển thị trong thumbnail -->
+                    <img
+                        src="{{ asset($product->images) }}"
+                        data-image="{{ asset($product->images) }}"
+                        class="thumbnail w-16 h-16 object-cover rounded border cursor-pointer"
+                    >
+
+                    <!-- Các ảnh phụ -->
                     @foreach($product->productImages as $image)
-                        <img src="{{ asset($image->image_url) }}" class="w-16 h-16 object-cover rounded border cursor-pointer"
-                             onmouseover="changeMainImage('{{ asset($image->image_url) }}')">
+                        <img
+                            src="{{ asset($image->image_url) }}"
+                            data-image="{{ asset($image->image_url) }}"
+                            class="thumbnail w-16 h-16 object-cover rounded border cursor-pointer"
+                        >
                     @endforeach
                 </div>
             </div>
+
+            <!-- Script đổi ảnh khi hover -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const mainImage = document.getElementById('mainImage');
+                    const thumbnails = document.querySelectorAll('.thumbnail');
+
+                    thumbnails.forEach(thumbnail => {
+                        thumbnail.addEventListener('mouseover', function () {
+                            const newSrc = this.getAttribute('data-image');
+                            mainImage.setAttribute('src', newSrc);
+                        });
+                    });
+                });
+            </script>
+
 
             <!-- Thông tin sản phẩm -->
             <div class=" rounded-lg">
@@ -88,7 +126,7 @@
 
                             <!-- Nút Edit -->
                             <a
-                                href="{{ route('exchange.editNews', $product['slug']) }}"
+                                href="{{ route('exchange.editPostProduct', $product['slug']) }}"
                                 class="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg text-base font-semibold hover:bg-green-600"
                             >
                                 <i class="fas fa-edit"></i>
@@ -202,7 +240,7 @@
 
                     <span class="text-gray-600">{{'Do you have similar products?'}}</span>
                 </div>
-                <a href="{{route('exchange.ProductNews')}}" class="text-orange-500 font-semibold"> {{'POST NEW'}}</a>
+                <a href="{{route('exchange.postProduct')}}" class="text-orange-500 font-semibold"> {{'NEW POST'}}</a>
             </div>
 
         </div>
@@ -234,12 +272,6 @@
 
         </div>
     </div>
-@endsection
-<script>
-    function changeMainImage(imageUrl) {
-        document.getElementById('mainImage').src = imageUrl;
-    }
-</script>
 
 <!-- Script xử lý show number -->
 <script>
@@ -277,3 +309,4 @@
         });
     });
 </script>
+@endsection

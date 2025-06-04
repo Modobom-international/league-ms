@@ -13,7 +13,7 @@
     <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow mt-4">
         <h2 class="text-xl font-bold mb-4">{{ 'New Post Product' }}</h2>
 
-        <form id="" method="POST" action="{{ route('exchange.updateNews', $product['slug']) }}"
+        <form id="" method="POST" action="{{ route('exchange.updatePostProduct', $product['slug']) }}"
             enctype="multipart/form-data">
             @csrf()
             {{-- Ảnh Chính --}}
