@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\ChatSend;
+use App\Events\ChatSent;
 use App\Http\Requests\UserRequest;
 use App\Models\CategoryProduct;
 use App\Models\Chatting;
@@ -16,6 +16,7 @@ use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 
@@ -455,8 +456,6 @@ class ExchangeController extends Controller
         ));
     }
 
-
-
     public function send(Request $request, $conversationId)
     {
         $conversation = Conversation::findOrFail($conversationId);
@@ -467,23 +466,30 @@ class ExchangeController extends Controller
             'file' => 'nullable|image|max:2048', // chỉ cho phép ảnh < 2MB
         ]);
 
+        $filePath = null;
         if ($request->hasFile('file')) {
             $image = $request->file('file');
             $imageName = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('/images/upload/product/'), $imageName);
-            $input['file'] = '/images/upload/product/' . $imageName; // Lưu đường dẫn
-
+            $filePath = '/images/upload/product/' . $imageName;
         }
 
         $message = Chatting::create([
             'conversation_id' => $conversation->id,
             'user_id' => $user->id,
             'content' => $request->input('content'),
-            'file' => $request->hasFile('file'),
+            'file' => $filePath,
         ]);
-        broadcast(new ChatSend($message))->toOthers();
 
-        return back();
+        // ✅ Ghi log kiểm tra
+        Log::info('Broadcasting ChatSent event', [
+            'conversation_id' => $conversation->id,
+            'message_id' => $message->id,
+            'user_id' => $user->id,
+        ]);
+        broadcast(new ChatSent($conversation, $message))->toOthers();
+
+        return response()->json(['message' => $message]);
     }
 
 }

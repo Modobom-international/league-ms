@@ -19,6 +19,19 @@
         .toast-top-right {
             top: 60px !important; /* bạn chỉnh số px tùy ý */
         }
+
+        @media (max-width: 767px) {
+            .ma-news {
+                display: none !important;
+            }
+        }
+
+        /* Hiện button trên desktop (từ 768px trở lên) */
+        @media (min-width: 768px) {
+            .ma-news {
+                display: inline-block; /* hoặc block, tùy bạn */
+            }
+        }
     </style>
     <!-- Summernote CSS -->
 
@@ -80,8 +93,9 @@
                 <a href="{{route('chat.listChat')}}" id="notification-btn" class="relative bg-gray-200 p-2 rounded-full">
                     💬
                 </a>
-                <a href="{{ route('exchange.managerNews') }}">
-                    <button>📋 {{ 'Manager news' }}</button>
+                <a href="{{ route('exchange.managerNews') }}" class="relative bg-gray-200 p-2 rounded-full">
+                    📋
+                    <button class="ma-news text-black"> {{ 'Manager news' }}</button>
                 </a>
 
                 @auth
@@ -89,13 +103,16 @@
                         <button id="user-toggle-btn" class="flex items-center space-x-2 hover:text-yellow-500">
                             <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
                                 class="w-8 h-8 rounded-full border" alt="User Avatar">
-                            <span class="font-semibold text-white-800">{{ Auth::user()->name }}</span>
+                            <span class="font-semibold text-white-800">{{ Auth::user()->name }}▼</span>
                             <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
                         <div id="user-dropdown"
-                            class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl z-50 p-4 space-y-4">
+                             class="hidden absolute mt-2 w-80 bg-white rounded-xl shadow-xl z-50 p-4 space-y-4
+            right-0 sm:right-0
+            left-1/2 sm:left-auto
+            transform -translate-x-1/2 sm:translate-x-0">
                             <div class="flex items-center space-x-3 border-b pb-3">
                                 <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
                                     class="w-12 h-12 rounded-full border">
@@ -135,13 +152,13 @@
                         </div>
                     </div>
                     <a href="{{ route('exchange.ProductNews') }}"
-                        class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold">
-                        + {{ 'POST NEW' }}
+                       class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold inline-block whitespace-nowrap">
+                        + {{ __('POST NEW') }}
                     </a>
                 @else
                     <a href="{{ route('login') }}" class="button white">{{ __('Log In') }}</a>
                     <a href="{{ route('register_user') }}" class="button btn-register">{{ __('Register') }}</a>
-                    @endif
+                @endif
                 </div>
             </div>
         </header>

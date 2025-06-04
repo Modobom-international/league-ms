@@ -1,9 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        /* Mobile: ẩn chat-detail, chỉ show sidebar full width */
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100% !important;
+                display: block !important;
+            }
+            .chat-detail {
+                display: none !important;
+            }
+        }
+
+        /* Desktop: show cả 2 phần */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 33.3333% !important;
+                display: block !important;
+            }
+            .chat-detail {
+                width: 66.6666% !important;
+                display: flex !important;
+            }
+        }
+    </style>
     <div class="container mx-auto max-w-screen-lg bg-white mt-4 flex h-screen">
         <!-- Danh sách cuộc trò chuyện -->
-        <div class="w-1/3 border-r border-gray-300 overflow-y-auto">
+        <div class="sidebar w-1/3 border-r border-gray-300 overflow-y-auto">
             <h2 class="p-4 font-bold text-xl border-b">Conversations</h2>
             <ul>
                 @foreach($conversations as $conv)
@@ -40,7 +64,7 @@
         </div>
 
         <!-- Khung chat -->
-        <div class="w-2/3 flex flex-col justify-between h-full">
+        <div class="chat-detail w-2/3 flex flex-col justify-between h-full">
             <div class="flex-grow flex items-center justify-center text-black-700">
                 Hãy chọn một cuộc trò chuyện để bắt đầu.
             </div>
