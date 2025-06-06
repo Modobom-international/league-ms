@@ -83,7 +83,11 @@
                         <div class="border rounded-xl  hover:shadow-md transition flex overflow-hidden p-5">
                             <!-- Hình ảnh -->
                             <div class="w-32 sm:w-40 md:w-48 h-28 sm:h-32 md:h-36 flex-shrink-0">
-                                <img src="{{ asset($product->images) }}" alt="{{ $product->name }}"
+                                @php
+                                    $images = json_decode($product->images, true) ?? [];
+                                    $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                                @endphp
+                                <img src="{{ asset($mainImage) }}" alt="{{ $product->name }}"
                                     class="w-full h-full object-cover rounded-l-xl">
                             </div>
                             <!-- Nội dung -->

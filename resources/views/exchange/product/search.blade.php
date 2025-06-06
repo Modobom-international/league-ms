@@ -83,7 +83,11 @@
                 @foreach ($products as $product)
                     <div class="bg-white p-6 rounded-lg shadow-md hover:scale-105">
                         <a href="{{route('exchange.productDetail', $product['slug'])}}">
-                            <img src="{{ asset($product->images) }}" class=" w-full  object-cover rounded-lg">
+                            @php
+                                $images = json_decode($product->images, true) ?? [];
+                                $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                            @endphp
+                            <img src="{{ asset($mainImage) }}" class=" w-full  object-cover rounded-lg">
                             <h4 class="mt-2 font-semibold">{{ $product->name }}</h4>
                         </a>
                         <p class="text-gray-600">{{ $product->condition }}</p>

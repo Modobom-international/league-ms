@@ -98,7 +98,11 @@
                                 <div
                                     class="product-card border rounded-lg overflow-hidden shadow-sm hover:shadow-md hover:scale-105 transition flex flex-col">
                                     <div class="relative">
-                                        <img src="{{ asset($product->images) }}" alt="image"
+                                        @php
+                                            $images = json_decode($product->images, true) ?? [];
+                                            $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                                        @endphp
+                                        <img src="{{ asset($mainImage) }}" alt="image"
                                             class="w-full h-48 object-cover">
                                     </div>
                                     <div class="p-3 space-y-1 flex-1 flex flex-col justify-between">

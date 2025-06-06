@@ -281,7 +281,11 @@
                         <a href="{{ route('exchange.productDetail', $related['slug']) }}" class="flex flex-col h-full">
                             {{-- Ảnh --}}
                             <div class="w-full h-40 overflow-hidden rounded">
-                                <img src="{{ asset($related->images) }}" class="w-full h-full object-cover" alt="{{ $related->name }}">
+                                @php
+                                    $images = json_decode($related->images, true) ?? [];
+                                    $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                                @endphp
+                                <img src="{{ asset($mainImage) }}" class="w-full h-full object-cover" alt="{{ $related->name }}">
                             </div>
 
                             {{-- Nội dung --}}
