@@ -8,13 +8,20 @@
         font-weight: 400 !important;
     }
 
-    #mainImage {
-        transition: opacity 0.3s ease-in-out; /* Hiệu ứng mờ dần */
-    }
     .thumbnail:hover {
         border-color: #3b82f6; /* Đổi màu viền khi hover (tuỳ chọn) */
         transform: scale(1.05); /* Phóng nhẹ ảnh nhỏ khi hover (tuỳ chọn) */
         transition: all 0.2s ease;
+    }
+
+    #firstImage {
+        display: block !important;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+    .relative {
+        overflow: visible;
     }
 </style>
 @section('content')
@@ -28,47 +35,47 @@
 
         <div class="grid grid-cols-1 bg-white shadow-md md:grid-cols-2 gap-5 p-6">
             <!-- Hình ảnh sản phẩm -->
-            <div>
-                <!-- Ảnh chính -->
-                <img src="{{ asset($product->images) }}" id="mainImage" class="w-full rounded-lg shadow-md">
+            @php
+                $images = json_decode($product->images, true) ?? [];
+                if (!is_array($images)) {
+                    $images = [];
+                }
+                // Chuẩn hóa đường dẫn
+                $images = array_map(function ($img) {
+                    return ltrim($img, '/');
+                }, $images);
 
-                <!-- Ảnh nhỏ bên dưới -->
-                <div class="flex space-x-2 mt-2">
-                    <!-- Ảnh chính cũng được hiển thị trong thumbnail -->
-                    <img
-                        src="{{ asset($product->images) }}"
-                        data-image="{{ asset($product->images) }}"
-                        class="thumbnail w-16 h-16 object-cover rounded border cursor-pointer"
-                    >
+            @endphp
 
-                    <!-- Các ảnh phụ -->
-                    @foreach($product->productImages as $image)
+            @if(count($images) > 0)
+                <div>
+                    <!-- Ảnh chính -->
+                    <div class="relative w-full h-[32rem] overflow-hidden border rounded-lg shadow-md p-2">
                         <img
-                            src="{{ asset($image->image_url) }}"
-                            data-image="{{ asset($image->image_url) }}"
-                            class="thumbnail w-16 h-16 object-cover rounded border cursor-pointer"
-                        >
-                    @endforeach
+                            id="firstImage"
+                            src="{{ asset($images[0] ?? '') }}"
+                            class="w-full h-96 object-contain rounded"
+                        />
+                        <!-- Nút Prev/Next -->
+                        <button id="prevBtn" class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white px-2 py-1 rounded">‹</button>
+                        <button id="nextBtn" class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white px-2 py-1 rounded">›</button>
+                    </div>
+
+                    <!-- Ảnh nhỏ -->
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        @foreach ($images as $idx => $img)
+                            <img src="{{ asset($img) }}"
+                                 class="thumbnail w-16 h-16 object-cover border cursor-pointer rounded"
+                                 data-index="{{ $idx }}">
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-
-            <!-- Script đổi ảnh khi hover -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const mainImage = document.getElementById('mainImage');
-                    const thumbnails = document.querySelectorAll('.thumbnail');
-
-                    thumbnails.forEach(thumbnail => {
-                        thumbnail.addEventListener('mouseover', function () {
-                            const newSrc = this.getAttribute('data-image');
-                            mainImage.setAttribute('src', newSrc);
-                        });
-                    });
-                });
-            </script>
+            @else
+                <div>Không có ảnh để hiển thị</div>
+        @endif
 
 
-            <!-- Thông tin sản phẩm -->
+        <!-- Thông tin sản phẩm -->
             <div class=" rounded-lg">
                 <h1 class="text-2xl font-bold uppercase p-0">{{ $product->name }}</h1>
 
@@ -99,9 +106,7 @@
                 @php $isLoggedIn = Auth::check(); @endphp
 
                 <div class="mt-4 flex space-x-2">
-
-
-                    @if($isLoggedIn && auth()->id() !== $product->user_id)
+                    @if($isLoggedIn && auth()->id() !== $product->user_id || !$isLoggedIn)
                         <button
                             id="showPhoneBtn"
                             class="flex-1 text-center border border-gray-300 px-4 py-2 rounded-lg text-lg font-semibold hover:bg-gray-100"
@@ -113,40 +118,61 @@
                             class="flex-1 text-center bg-green-500 text-white px-4 py-2 rounded-lg text-lg font-semibold hover:bg-green-600">
                             💬 Chat
                         </a>
-                    @elseif(auth()->id() == $product->user_id)
-                        <div class="mt-4 flex gap-2">
-                            <!-- Nút Delete -->
-                            <button
-                                class="flex-1 flex items-center justify-center gap-2 border border-red-500 text-red-500 px-4 py-2 rounded-lg text-base font-semibold hover:bg-red-500 hover:text-white transition openDeleteModal"
-                                data-url="{{ route('product.destroy', $product->id) }}"
-                            >
-                                <i class="fas fa-trash-alt"></i>
-                                <span>{{ __('Sold/Delete') }}</span>
-                            </button>
+                    @elseif($isLoggedIn && auth()->id() == $product->user_id)
+                        <div class=" w-full">
+                            <div class="flex w-full gap-2">
+                                <!-- Nút Delete -->
+                                <button
+                                    class="w-1/2 flex items-center justify-center gap-2 border border-red-500 text-red-500 px-4 py-2 rounded-lg text-base font-semibold hover:bg-red-500 hover:text-white transition openDeleteModal"
+                                    data-url="{{ route('product.destroy', $product->id) }}"
+                                >
+                                    <i class="fas fa-trash-alt"></i>
+                                    <span>{{ __('Sold/Delete') }}</span>
+                                </button>
 
-                            <!-- Nút Edit -->
-                            <a
-                                href="{{ route('exchange.editPostProduct', $product['slug']) }}"
-                                class="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg text-base font-semibold hover:bg-green-600"
-                            >
-                                <i class="fas fa-edit"></i>
-                                <span>{{ __('Edit Post') }}</span>
-                            </a>
+                                <!-- Nút Edit -->
+                                <a
+                                    href="{{ route('exchange.editPostProduct', $product['slug']) }}"
+                                    class="w-1/2 flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg text-base font-semibold hover:bg-green-600"
+                                >
+                                    <i class="fas fa-edit"></i>
+                                    <span>{{ __('Edit Post') }}</span>
+                                </a>
+                            </div>
                         </div>
                         <div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
                             <div class="bg-white rounded-lg shadow-lg w-[400px]">
                                 <!-- Header -->
                                 <div class="bg-orange-400 text-white font-semibold text-lg px-4 py-3 rounded-t-lg">
-                                    {{ 'Delete post' }}
+                                    {{ 'Hide post' }}
                                 </div>
-
                                 <!-- Nội dung -->
-                                <div class="p-6">
-                                    <p class="text-gray-800 font-medium">
-                                        {{ 'When you no longer want the story to appear, select "Delete"' }}
-                                    </p>
-
+                                <div class="p-6 space-y-3">
+                                    <p class="text-gray-800 font-medium mb-2">{{ __('Please select the reason for hiding this post:') }}</p>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center space-x-2">
+                                            <input type="radio" name="hide_reason" value="sold_on_platform" class="form-radio text-blue-600">
+                                            <span>{{ __('Item sold on this platform') }}</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="radio" name="hide_reason" value="sold_elsewhere" class="form-radio text-blue-600">
+                                            <span>{{ __('Item sold on other platform') }}</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="radio" name="hide_reason" value="no_longer_interested" class="form-radio text-blue-600">
+                                            <span>{{ __('No longer interested in selling') }}</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="radio" name="hide_reason" value="not_effective" class="form-radio text-blue-600">
+                                            <span>{{ __('Listing not effective / poor results') }}</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="radio" name="hide_reason" value="other" class="form-radio text-blue-600">
+                                            <span>{{ __('Other') }}</span>
+                                        </label>
+                                    </div>
                                 </div>
+
 
                                 <!-- Footer -->
                                 <div class="flex justify-between border-t px-6 py-4">
@@ -157,17 +183,39 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="px-5 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
-                                            {{ 'Delete' }}
+                                            {{ 'Hide' }}
                                         </button>
                                     </form>
                                 </div>
                             </div>
                         </div>
-
                     @endif
 
                 </div>
-
+                <!-- Thông tin người bán -->
+                <div class="border rounded-lg p-4 flex justify-between items-center mt-4 max-w-xl w-full">
+                    <div class="flex items-center space-x-3">
+                        <div
+                            class="w-12 h-12 bg-green-800 text-white rounded-full flex items-center justify-center text-lg font-semibold">
+                            {{ strtoupper(substr($product->users->name, 0, 1)) }}
+                        </div>
+                        <div>
+                            <div class="font-semibold text-gray-900">{{ $product->users->name }}</div>
+                            <div class="text-sm text-gray-600">Phản hồi: -- <a href="#"
+                                                                               class="text-blue-600 underline">{{ 1 }} đã bán</a></div>
+                            <div class="text-sm text-gray-500 flex items-center space-x-1">
+                                <span class="w-2 h-2 bg-gray-400 rounded-full inline-block"></span>
+                                <span>{{ __('Active') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right border-l pl-4">
+                        <div class="text-lg font-semibold text-gray-800 flex items-center justify-end gap-1">
+                            {{ 2 }} <span class="text-yellow-500">★</span></div>
+                        <a href="#" class="text-sm text-blue-600 underline">{{ 3 }}
+                            {{ __('reviews') }}</a>
+                    </div>
+                </div>
                 <!-- Modal đăng nhập -->
                 <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
@@ -180,27 +228,6 @@
                     </div>
                 </div>
 
-            @if($isLoggedIn && auth()->id() !== $product->user_id)
-                <!-- Thông tin người bán -->
-                <div class="mt-6 p-4 bg-gray-100 rounded-lg flex items-center">
-                    <img src="{{ asset($product->users->profile_photo_path ?? 'default-avatar.png') }}" class="w-12 h-12 rounded-full border">
-                    <div class="ml-3">
-                        <h3 class="font-bold">{{ $product->users->name }}</h3>
-                        <p class="text-gray-500">{{ 'Feedback' }}: 91% • </p>
-                        <p class="text-gray-400">{{ 'Active' }}</p>
-                    </div>
-                </div>
-
-                <div class="mt-4 flex items-center">
-                    <span class="text-yellow-500 text-xl">⭐ {{ $product->rating }}</span>
-                    <a href="#" class="text-blue-500 ml-2">{{ $product->reviews_count }} {{ 'Rate' }}</a>
-                </div>
-
-                <div class="mt-4 flex space-x-2">
-                    <a href="#" class="flex-1 text-center bg-gray-200 text-black px-4 py-2 rounded-lg">{{ 'Does this product come in other colors?' }}</a>
-                    <a href="#" class="flex-1 text-center bg-gray-200 text-black px-4 py-2 rounded-lg">{{ 'Is this new or used?' }}</a>
-                </div>
-                @endif
             </div>
         </div>
 
@@ -309,4 +336,37 @@
         });
     });
 </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Đây là mảng ảnh, được Laravel render thành JS array
+            const images = @json($images);
+            const mainImage = document.getElementById("firstImage");
+            console.log(mainImage)
+            const prevBtn = document.getElementById("prevBtn");
+            console.log(prevBtn)
+            const nextBtn = document.getElementById("nextBtn");
+            console.log(nextBtn)
+            let currentIndex = 0;
+
+            function updateImage() {
+                mainImage.src = images[currentIndex]
+                    ? `{{ asset('') }}` + images[currentIndex]
+                    : '';
+            }
+
+            prevBtn.addEventListener("click", function () {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateImage();
+                }
+            });
+
+            nextBtn.addEventListener("click", function () {
+                if (currentIndex < images.length - 1) {
+                    currentIndex++;
+                    updateImage();
+                }
+            });
+        });
+    </script>
 @endsection

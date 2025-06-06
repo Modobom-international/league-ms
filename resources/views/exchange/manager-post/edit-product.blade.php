@@ -16,30 +16,48 @@
         <form id="" method="POST" action="{{ route('exchange.updatePostProduct', $product['slug']) }}"
             enctype="multipart/form-data">
             @csrf()
+
+            @php
+                $images = json_decode($product->images, true) ?? [];
+                $coverIndex = $product->cover_index ?? 0;
+            @endphp
             {{-- Ảnh Chính --}}
-            <div class="grid grid-cols-3 gap-4">
-                <div class="border p-4 rounded-lg">
-                    <label class="block font-medium">{{ 'Main Image' }}</label>
-                    <input type="file" name="images" class="w-full p-2" id="mainImageInput">
-                    <div class="mt-2">
-                        <img id="mainImagePreview" src="{{ asset($product->images ?? '/images/logo-no-background.png') }}"
-                            class="w-32 h-32 object-cover {{ $product->images ? '' : 'hidden' }}" />
-                    </div>
+            <div id="image-upload-area" class="border border-dashed border-orange-400 p-4 rounded-md">
+                <div class="text-sm text-gray-500 mb-2">
+                    <i class="text-blue-500">ⓘ</i> Hình ảnh hợp lệ (đăng từ 01 đến 06 hình)
                 </div>
 
-                {{-- Ảnh Phụ --}}
-                <div class=" p-4 rounded-lg">
-                    <label class="block font-medium">{{ 'Sub Image' }}</label>
-                    <input type="file" name="sub_images[]" multiple class="w-full p-2" id="subImagesInput">
-                    <div class="mt-2 flex gap-2" id="subImagesPreview">
+                <div class="flex flex-wrap gap-2" id="image-preview-container">
+                    {{-- Hiển thị ảnh cũ --}}
+                    @foreach ($images as $index => $img)
+                        <div
+                            class="relative w-24 h-24 border rounded overflow-hidden cursor-move flex items-center justify-center"
+                            data-index="{{ $index }}"
+                            style="{{ $index == $coverIndex ? 'border-color: #f97316; border-width: 3px;' : '' }}"
+                        >
+                            <img src="{{ asset($img) }}" alt="Product Image {{ $index }}" class="object-cover w-full h-full">
+                            <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs delete-image-btn">&times;</button>
+                            @if ($index == $coverIndex)
+                                <span class="absolute bottom-1 left-1 bg-orange-400 text-white text-xs px-1 rounded"></span>
+                            @endif
+                        </div>
+                    @endforeach
 
-                        @foreach ($product->productImages ?? [] as $image)
-                            <img src="{{ asset($image->image_url) }}" class="w-20 h-20 object-cover rounded border">
-                        @endforeach
+                    {{-- Ảnh mới sẽ thêm vào đây bằng JS --}}
+                    <div id="previewContainer" class="flex flex-wrap gap-2"></div>
 
-                    </div>
+                    {{-- Nút thêm ảnh --}}
+                    <label for="imageInput" class="cursor-pointer w-24 h-24 border-2 border-dashed flex items-center justify-center text-orange-400 font-bold text-xl rounded hover:bg-orange-50">
+                        +
+                    </label>
                 </div>
+
+                <input type="file" id="imageInput" name="images[]" accept="image/*" multiple hidden>
+                <input type="hidden" name="cover_index" id="cover-index" value="{{ $coverIndex }}">
+                <input type="hidden" name="delete-image-btn" id="delete-image-btn" value="">
+                <p class="text-sm text-gray-500 mt-2">Nhấn và giữ để di chuyển hình ảnh</p>
             </div>
+
 
             {{-- Chọn danh mục --}}
             <div class="mt-4">
@@ -224,35 +242,122 @@
             });
         });
     </script>
+{{--    <script>--}}
+{{--        document.getElementById('mainImageInput').addEventListener('change', function(event) {--}}
+{{--            let file = event.target.files[0];--}}
+{{--            if (file) {--}}
+{{--                let reader = new FileReader();--}}
+{{--                reader.onload = function(e) {--}}
+{{--                    let img = document.getElementById('mainImagePreview');--}}
+{{--                    img.src = e.target.result;--}}
+{{--                    img.classList.remove('hidden');--}}
+{{--                };--}}
+{{--                reader.readAsDataURL(file);--}}
+{{--            }--}}
+{{--        });--}}
+
+{{--        document.getElementById('subImagesInput').addEventListener('change', function(event) {--}}
+{{--            let files = event.target.files;--}}
+{{--            let previewContainer = document.getElementById('subImagesPreview');--}}
+{{--            previewContainer.innerHTML = ''; // Clear previous previews--}}
+
+{{--            for (let file of files) {--}}
+{{--                let reader = new FileReader();--}}
+{{--                reader.onload = function(e) {--}}
+{{--                    let img = document.createElement('img');--}}
+{{--                    img.src = e.target.result;--}}
+{{--                    img.classList.add('w-20', 'h-20', 'object-cover', 'rounded', 'border');--}}
+{{--                    previewContainer.appendChild(img);--}}
+{{--                };--}}
+{{--                reader.readAsDataURL(file);--}}
+{{--            }--}}
+{{--        });--}}
+{{--    </script>--}}
     <script>
-        document.getElementById('mainImageInput').addEventListener('change', function(event) {
-            let file = event.target.files[0];
-            if (file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let img = document.getElementById('mainImagePreview');
-                    img.src = e.target.result;
-                    img.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        let images = [];
+        const input = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
 
-        document.getElementById('subImagesInput').addEventListener('change', function(event) {
-            let files = event.target.files;
-            let previewContainer = document.getElementById('subImagesPreview');
-            previewContainer.innerHTML = ''; // Clear previous previews
+        if (input) {
+            input.addEventListener('change', function () {
+                [...this.files].forEach(file => {
+                    if (images.length >= 6) return;
 
-            for (let file of files) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.classList.add('w-20', 'h-20', 'object-cover', 'rounded', 'border');
-                    previewContainer.appendChild(img);
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        images.push({ src: e.target.result, file });
+                        renderPreviews();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+
+        function renderPreviews() {
+            previewContainer.innerHTML = '';
+            images.forEach((img, idx) => {
+                const div = document.createElement('div');
+                div.className = 'relative group';
+                div.draggable = true;
+
+                div.innerHTML = `
+                <img src="${img.src}" class="w-24 h-24 object-cover rounded border border-gray-300">
+                <button onclick="removeImage(${idx})"
+                        class="absolute -top-1 -right-1 bg-black text-white rounded-full px-1 text-xs hidden group-hover:block">×</button>
+                ${idx === 0 ? `<span class="absolute bottom-0 left-0 bg-black bg-opacity-70 text-white text-xs px-1">Hình bìa</span>` : ''}
+            `;
+
+                div.ondragstart = (e) => e.dataTransfer.setData("index", idx);
+                div.ondrop = (e) => {
+                    e.preventDefault();
+                    const fromIndex = e.dataTransfer.getData("index");
+                    const toIndex = idx;
+                    reorderImages(fromIndex, toIndex);
                 };
-                reader.readAsDataURL(file);
+                div.ondragover = (e) => e.preventDefault();
+
+                previewContainer.appendChild(div);
+            });
+        }
+
+        function removeImage(index) {
+            images.splice(index, 1);
+            renderPreviews();
+        }
+
+        function reorderImages(from, to) {
+            const item = images.splice(from, 1)[0];
+            images.splice(to, 0, item);
+            renderPreviews();
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let deletedOldImages = [];
+
+            let deletedImagesInput = document.getElementById('delete-image-btn');
+            if (!deletedImagesInput) {
+                deletedImagesInput = document.createElement('input');
+                deletedImagesInput.type = 'hidden';
+                deletedImagesInput.name = 'delete-image-btn';
+                deletedImagesInput.id = 'delete-image-btn';
+                document.querySelector('form').appendChild(deletedImagesInput);
             }
+
+            document.querySelectorAll('.delete-image-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const imageDiv = btn.closest('div[data-index]');
+                    const index = imageDiv.getAttribute('data-index');
+                    if (!deletedOldImages.includes(index)) {
+                        deletedOldImages.push(index);
+                    }
+                    deletedImagesInput.value = deletedOldImages.join(',');
+                    imageDiv.remove();
+                });
+            });
         });
     </script>
+
+
 @endsection

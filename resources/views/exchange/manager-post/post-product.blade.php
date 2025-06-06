@@ -3,12 +3,6 @@
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Summernote CSS -->
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-
-<!-- Summernote JS -->
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
-
 @section('content')
     <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow mt-4">
         <h2 class="text-xl font-bold mb-4">{{'New Post Product'}}</h2>
@@ -19,27 +13,27 @@
             {{-- Hình ảnh & Video sản phẩm --}}
             <!-- Ảnh Chính -->
                 <div class="grid grid-cols-3 gap-4">
-                    <div class="border p-4 rounded-lg">
-                        <label class="block font-medium">{{'Main Photo'}}</label>
-                        <input type="file" name="images" class="w-full  p-2" id="mainImageInput">
-                        <div class="mt-2">
-                            <img id="mainImagePreview" src="{{asset( '/images/logo-no-background.png')}}" class="hidden w-32 h-32 object-cover  "  />
+                    <div class="max-w-xl mx-auto mt-6">
+                        <label for="imageInput" class="block mb-2 text-sm font-medium text-gray-700">
+                            Hình ảnh hợp lệ
+                        </label>
+
+                        <input id="imageInput" type="file" accept="image/*"  name="images[]" multiple hidden>
+
+                        <!-- Upload Box -->
+                        <div id="uploadBox"
+                             class="w-full h-48 border-2 border-dashed border-orange-400 flex flex-col justify-center items-center text-gray-500 cursor-pointer hover:bg-orange-50 transition"
+                             onclick="document.getElementById('imageInput').click()">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="mt-2 text-sm">ĐĂNG TỪ 01 ĐẾN 06 HÌNH</span>
                         </div>
 
-                        @error('images')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
+                        <!-- Preview List -->
+                        <div id="previewContainer" class="mt-4 flex flex-wrap gap-2"></div>
 
-                    <!-- Ảnh Phụ -->
-                    <div class=" p-4 rounded-lg">
-                        <label class="block font-medium">{{'Sub Photo'}} </label>
-                        <input type="file" name="product_images[]" multiple class="w-full  p-2 " id="subImagesInput" >
-                        <!-- Hiển thị lỗi validate -->
-                        @error('product_images')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                        <div class="mt-2 flex gap-2" id="subImagesPreview"></div>
+                        <p class="text-sm text-gray-500 mt-2 italic">Nhấn và giữ để di chuyển hình ảnh</p>
                     </div>
                 </div>
             {{-- Chọn danh mục --}}
@@ -256,21 +250,64 @@
         }
     });
 </script>
-    <script>
-        $(document).ready(function() {
-            $('#editor').summernote({
-                placeholder: 'Content...',
-                tabsize: 2,
-                height: 300,
-                toolbar: [
-                    ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['font', ['strikethrough', 'superscript', 'subscript']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                ]
+
+<script>
+        let images = [];
+        const input = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+
+        input.addEventListener('change', function () {
+            [...this.files].forEach(file => {
+                if (images.length >= 6) return;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    images.push({ src: e.target.result, file });
+                    renderPreviews();
+                };
+                reader.readAsDataURL(file);
             });
         });
+
+        function renderPreviews() {
+            previewContainer.innerHTML = '';
+            images.forEach((img, idx) => {
+                const div = document.createElement('div');
+                div.className = 'relative group';
+                div.draggable = true;
+
+                div.innerHTML = `
+                <img src="${img.src}" class="w-24 h-24 object-cover rounded border border-gray-300">
+                <button onclick="removeImage(${idx})"
+                        class="absolute -top-1 -right-1 bg-black text-white rounded-full px-1 text-xs hidden group-hover:block">×</button>
+                ${idx === 0 ? `<span class="absolute bottom-0 left-0 bg-black bg-opacity-70 text-white text-xs px-1">Hình bìa</span>` : ''}
+            `;
+
+                // Drag and drop
+                div.ondragstart = (e) => {
+                    e.dataTransfer.setData("index", idx);
+                };
+                div.ondrop = (e) => {
+                    e.preventDefault();
+                    const fromIndex = e.dataTransfer.getData("index");
+                    const toIndex = idx;
+                    reorderImages(fromIndex, toIndex);
+                };
+                div.ondragover = (e) => e.preventDefault();
+
+                previewContainer.appendChild(div);
+            });
+        }
+
+        function removeImage(index) {
+            images.splice(index, 1);
+            renderPreviews();
+        }
+
+        function reorderImages(from, to) {
+            const item = images.splice(from, 1)[0];
+            images.splice(to, 0, item);
+            renderPreviews();
+        }
     </script>
 @endsection

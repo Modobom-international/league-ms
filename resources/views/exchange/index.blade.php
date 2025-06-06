@@ -141,6 +141,11 @@
                 <!-- Card Item -->
                 @include('exchange.paginate.product-list', ['products' => $products])
             </div>
+            <div class="text-center mt-6">
+                <button id="loadMoreBtn" data-page="2" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    {{ __('Load More') }}
+                </button>
+            </div>
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-md mt-4 mx-auto ">

@@ -257,6 +257,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //exchange
     Route::get('/user/profile', [ExchangeController::class, 'profile'])->name('exchange.profile');
 
+    Route::get('/manager-posts', [ExchangeController::class, 'managerPosts'])->name('exchange.managerPosts');
+    Route::post('/store-post-product/', [ExchangeController::class, 'storePostProduct'])->name('exchange.storePostProduct');
     Route::get('/post-product', [ExchangeController::class, 'postProduct'])->name('exchange.postProduct');
     Route::get('/product/{slug}', [ExchangeController::class, 'editPostProduct'])->name('exchange.editPostProduct');
 
@@ -266,9 +268,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/profile/{id}/', [ExchangeController::class, 'update'])->name('exchange.update');
     Route::get('/me/change-password/', [ExchangeController::class, 'changePassword'])->name('exchange.changePassword');
     Route::post('/profile/update-password/', [ExchangeController::class, 'updatePassword'])->name('exchange.updatePassword');
-
-    Route::get('/manager-posts', [ExchangeController::class, 'managerPosts'])->name('exchange.managerPosts');
-    Route::post('/store-post-product/', [ExchangeController::class, 'storePostProduct'])->name('exchange.storePostProduct');
 
     //chatting
     Route::get('/chat/product/{product}', [ExchangeController::class, 'chatWithSeller'])->name('chat.withSeller');

@@ -144,48 +144,47 @@ class ExchangeController extends Controller
 
     public function storePostProduct(Request $request)
     {
+        // Validate
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'condition' => 'required|in:new,used',
             'price' => 'required|numeric|min:0',
             'location' => 'required|string',
-            'images' => 'required|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'product_images'   => 'required|array',
-            'product_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images' => 'required|array|min:1|max:6',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        // Tạo sản phẩm mới
-        $input = $request->except(['_token']);
-        $input = $request->except(['_token']);
-        $input['slug'] = Str::slug($request->name);
+
+        // Tạo dữ liệu sản phẩm
+        $input['slug'] = Str::slug($request->name . '-' . uniqid());
         $input['status'] = \App\Enums\Product::STATUS_POST_NEWS;
-        $input['user_id'] = Auth::user()->id;
+        $input['user_id'] = Auth::id();
         $input['start_date'] = now();
         $input['expires_at'] = now()->addDays(30);
-        // Xử lý ảnh chính (image)
-        if ($request->hasFile('images')) {
-            $image = $request->file('images');
-            $imageName = time() . '_' . $image->getClientOriginalName();
+        $input['name'] = $request->name;
+        $input['category'] = $request->category;
+        $input['description'] = $request->description;
+        $input['condition'] = $request->condition;
+        $input['location'] = $request->location;
+        $input['price'] = $request->price;
+        // Lưu ảnh đầu tiên làm ảnh đại diện (cover)
+        $imagePaths = [];
+
+        foreach ($request->file('images') as $image) {
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('/images/upload/product/'), $imageName);
-            $input['images'] = '/images/upload/product/' . $imageName; // Lưu đường dẫn
-
+            $imagePaths[] = '/images/upload/product/' . $imageName;
         }
-        $product = $this->productRepository->create($input);
-        // Xử lý ảnh phụ (images)
-        if ($request->hasFile('product_images')) {
-            foreach ($request->file('product_images') as $file) {
-                $imageName = time() . '_' . $file->getClientOriginalName();
-                $file->move(public_path('/images/upload/product/'), $imageName);
 
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'image_url' => '/images/upload/product/' . $imageName
-                ]);
-            }
-        }
+        $input['images'] = json_encode($imagePaths);
+        // Tạo sản phẩm
+        $product = $this->productRepository->store($input);
+
+        // (Tùy chọn) Nếu bạn muốn lưu thêm nhiều ảnh phụ vào bảng khác thì xử lý tại đây (hiện tại bạn không cần)
 
         return redirect()->route('exchange.managerPosts')->with('success', 'Post news created success!');
     }
+
 
     public function managerPosts(Request $request)
     {
@@ -223,25 +222,20 @@ class ExchangeController extends Controller
     {
         $input = $request->except(['_token']);
         $dataProduct = $this->productRepository->productDetail($slug);
-        if(!$dataProduct) {
-            return redirect()->route('exchange.home')->with('success', 'Product not found!');
+        if (!$dataProduct) {
+            return redirect()->route('exchange.home')->with('error', 'Product not found!');
         }
 
-         $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'condition' => 'required|in:new,used',
             'price' => 'required|numeric|min:0',
-            'images' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-             'product_images'   => 'array',
-             'product_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-         if(!($request->location)) {
-            $location = $dataProduct->location;
-         }
+        $location = $request->location ?? $dataProduct->location;
 
-        // Cập nhật thông tin sản phẩm
         $data = [
             'name' => $input['name'],
             'price' => $input['price'],
@@ -250,35 +244,47 @@ class ExchangeController extends Controller
             'description' => $input['description'],
             'location' => $location,
             'start_date' => $dataProduct->start_date,
-            'expires_at' => $dataProduct->expires_at
+            'expires_at' => $dataProduct->expires_at,
         ];
 
-        // Cập nhật ảnh chính
-        if ($request->hasFile('images')) {
-            $image = $request->file('images');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $image->move(public_path('/images/upload/product/'), $imageName);
-            $input['images'] = '/images/upload/product/' . $imageName; // Lưu đường dẫn
+        // Danh sách ảnh cũ (mảng)
+        $oldImages = json_decode($dataProduct->images ?? '[]', true);
 
-        }
-        $product = $this->productRepository->updateBySlug($data, $slug);
-        // Xử lý ảnh phụ (images)
-        if ($request->hasFile('sub_images')) {
-            foreach ($request->file('sub_images') as $file) {
-                $imageName = time() . '_' . $file->getClientOriginalName();
-                $file->move(public_path('/images/upload/product/'), $imageName);
-
-                ProductImage::create([
-                    'product_id' => $dataProduct->id,
-                    'image_url' => '/images/upload/product/' . $imageName
-                ]);
+        // Danh sách index ảnh cũ bị xóa
+        $deletedIndexes = array_filter(explode(',', $request->input('delete-image-btn', '')), 'is_numeric');
+        // Xóa ảnh bị xóa khỏi mảng và ổ đĩa
+        foreach ($deletedIndexes as $index) {
+            if (isset($oldImages[$index])) {
+                $imagePath = public_path($oldImages[$index]);
+                if (file_exists($imagePath)) {
+                    @unlink($imagePath);
+                }
+                unset($oldImages[$index]);
             }
         }
+
+        // Re-index lại mảng
+        $oldImages = array_values($oldImages);
+
+        // Thêm ảnh mới
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('/images/upload/product/'), $imageName);
+                $oldImages[] = '/images/upload/product/' . $imageName;
+            }
+        }
+
+        // Cập nhật lại mảng ảnh
+        $data['images'] = json_encode($oldImages);
+
+        // Cập nhật sản phẩm
+        $this->productRepository->updateBySlug($data, $slug);
 
         return redirect()->route('exchange.managerPosts')->with('success', 'Product updated successfully');
     }
 
-     public function destroy($id)
+    public function destroy($id)
      {
          $this->productRepository->destroy($id);
 
