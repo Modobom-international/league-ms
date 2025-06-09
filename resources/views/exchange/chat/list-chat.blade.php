@@ -51,7 +51,11 @@
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <img class="image w-[2rem] rounded-lg mr-4" src="{{asset($conv->product->images)}}" alt="avatar" >
+                                    @php
+                                        $images = json_decode($conv->product->images, true) ?? [];
+                                        $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                                    @endphp
+                                    <img class="image w-[2rem] rounded-lg mr-4" src="{{asset($mainImage)}}" alt="avatar" >
 
                                 </div>
                             </div>

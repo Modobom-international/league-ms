@@ -10,24 +10,33 @@
     <script>
         window.authUserId = {{ auth()->id() }};
 
-        window.Pusher = Pusher;
+        // Không khởi tạo Echo ở đây nữa nếu đã import và khởi tạo trong JS riêng (echo-chatting.js).
+        // Nếu bạn vẫn muốn khởi tạo trong blade, thì làm như sau:
 
         window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: '{{ env("PUSHER_APP_KEY") }}',
-            cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-            forceTLS: true,
-            // encrypted: true, // có thể bỏ vì mặc định forceTLS=true là đủ
+            broadcaster: 'reverb',
+            key: '{{ env("REVERB_APP_KEY") }}',           // hoặc bỏ nếu bạn truyền client trực tiếp
+            wsHost: '{{ env("REVERB_HOST") }}',
+            wsPort: {{ env("REVERB_PORT") ?? 80 }},
+            wssPort: {{ env("REVERB_PORT") ?? 443 }},
+            forceTLS: {{ (env("REVERB_SCHEME") ?? 'https') === 'https' ? 'true' : 'false' }},
+            enabledTransports: ['ws', 'wss'],
         });
 
-        window.Echo.connector.pusher.connection.bind('connected', () => {
-            console.log('✅ Pusher connected');
-        });
+        // Bind event connection - sửa thành reverb (thay vì pusher)
+        if (window.Echo.connector && window.Echo.connector.reverb) {
+            window.Echo.connector.reverb.connection.bind('connected', () => {
+                console.log('✅ Reverb connected');
+            });
 
-        window.Echo.connector.pusher.connection.bind('error', (err) => {
-            console.error('❌ Pusher connection error:', err);
-        });
+            window.Echo.connector.reverb.connection.bind('error', (err) => {
+                console.error('❌ Reverb connection error:', err);
+            });
+        } else {
+            console.warn('Reverb connector not found');
+        }
     </script>
+
     <style>
         .flex justify-end
         {
@@ -84,7 +93,11 @@
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <img class="image w-[3rem] rounded-lg" src="{{ asset($conv->product->images) }}"
+                                    @php
+                                        $images = json_decode($conv->product->images, true) ?? [];
+                                        $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                                    @endphp
+                                    <img class="image w-[3rem] rounded-lg" src="{{ asset($mainImage) }}"
                                          alt="avatar">
                                 </div>
                             </div>
@@ -100,7 +113,7 @@
             @php
                 $authUser = auth()->user();
                 $product = $conversation->product;
-                $partner = $conversation->buyer_id === $authUser->id ? $conversation->seller : $conversation->buyer;
+                $partner = $conversation->buyer_id === $authUser->id ? $conversation->seller: $conversation->buyer;
             @endphp
 
             <!-- Header -->
@@ -120,7 +133,11 @@
 
                 <div class="flex p-3">
                     <div>
-                        <img class="image w-[3rem] rounded-lg" src="{{ asset($product->images) }}" alt="avatar">
+                        @php
+                            $images = json_decode($product->images, true) ?? [];
+                            $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                        @endphp
+                        <img class="image w-[3rem] rounded-lg" src="{{ asset($mainImage) }}" alt="avatar">
                     </div>
                     <div class="ml-4">
                         <div class="text-sm text-black-600">{{ $product->name }}</div>
@@ -153,96 +170,22 @@
                 <!-- Chat Input -->
                 <form id="chatForm" class="p-4 border-t bg-white">
                     @csrf
+                    @if(!($authUser->id == $product->user_id))
                     <div class="flex flex-wrap gap-2 mb-2">
                         @foreach (['Sản phẩm này còn không ạ?', 'Bạn có ship hàng không?', 'Bạn có những size nào?'] as $quickMsg)
                             <button type="button" onclick="insertQuickReply(`{{ $quickMsg }}`)"
-                                    class=" px-3 py-1 rounded-full text-sm bg-[##f5deb3]">
+                                    class="bg-wh px-3 py-1 rounded-full text-sm bg-[#f5deb3]">
                                 {{ $quickMsg }}
                             </button>
                         @endforeach
                     </div>
+                    @endif
                     <div class="flex items-center gap-2">
                         <input type="text" id="chatInput" name="content" placeholder="Nhập tin nhắn"
                                class="flex-1 px-4 py-2 border rounded-full">
                         <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded-full">Gửi</button>
                     </div>
                 </form>
-
-                <script>
-                    // Chèn nhanh tin nhắn mẫu
-                    function insertQuickReply(text) {
-                        document.getElementById('chatInput').value = text;
-                        document.getElementById('chatInput').focus();
-                    }
-
-                    const conversationId = document.getElementById('chat-box').dataset.conversationId;
-                    const messagesContainer = document.getElementById('messages');
-
-                    console.log('Đang kết nối đến channel:', `chat.${conversationId}`);
-
-                    // Bắt sự kiện gửi form
-                    document.getElementById('chatForm').addEventListener('submit', async function (e) {
-                        e.preventDefault();
-
-                        const input = document.getElementById('chatInput');
-                        const content = input.value.trim();
-                        if (!content) return;
-
-                        try {
-                            // Gửi tin nhắn qua Axios
-                            await axios.post("{{ route('chat.send', $conversation->id) }}", {
-                                content: content
-                            });
-
-                            // Xóa input sau khi gửi
-                            input.value = '';
-
-                            // Tự hiển thị tin nhắn vừa gửi
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'flex justify-end';
-
-                            const bubble = document.createElement('div');
-                            bubble.className = 'px-4 py-2 rounded-lg max-w-xs bg-blue-500 text-white';
-                            bubble.textContent = content;
-
-                            wrapper.appendChild(bubble);
-                            messagesContainer.appendChild(wrapper);
-                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                        } catch (error) {
-                            console.error('Lỗi gửi tin nhắn:', error);
-                        }
-                    });
-
-                    // Lắng nghe tin nhắn từ người khác
-                    console.log("Đang lắng nghe sự kiện trên channel:", `chat.${conversationId}`);
-
-                    window.Echo.private(`chat.${conversationId}`)
-                        .listen('ChatSent', (e) => {
-                            console.log("🔥 Đã nhận được sự kiện ChatSent:", e);
-
-                            const msg = e.message;
-                            console.log("📩 Nội dung message:", msg);
-
-                            if (msg.user_id === window.authUserId) {
-                                console.log("🚫 Tin nhắn của chính mình, không hiển thị lại");
-                                return;
-                            }
-
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'flex justify-start';
-
-                            const bubble = document.createElement('div');
-                            bubble.className = 'px-4 py-2 rounded-lg max-w-xs bg-gray-200 text-black';
-                            bubble.textContent = msg.content;
-
-                            wrapper.appendChild(bubble);
-                            messagesContainer.appendChild(wrapper);
-                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                        });
-                </script>
-
-
             @else
                 <div class="flex items-center justify-center flex-1">
                     <p class="text-black-500">Chọn một cuộc trò chuyện để bắt đầu.</p>
@@ -251,3 +194,78 @@
         </div>
     </div>
 @endsection
+<script>
+    // Chèn nhanh tin nhắn mẫu
+    document.addEventListener('DOMContentLoaded', function () {
+    function insertQuickReply(text) {
+        document.getElementById('chatInput').value = text;
+        document.getElementById('chatInput').focus();
+    }
+
+    const conversationId = document.getElementById('chat-box').dataset.conversationId;
+    const messagesContainer = document.getElementById('messages');
+
+    console.log('Đang kết nối đến channel:', `chat.${conversationId}`);
+
+    // Bắt sự kiện gửi form
+    document.getElementById('chatForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const input = document.getElementById('chatInput');
+        const content = input.value.trim();
+        if (!content) return;
+
+        try {
+            // Gửi tin nhắn qua Axios
+            await axios.post("{{ route('chat.send', $conversation->id) }}", {
+                content: content
+            });
+
+            // Xóa input sau khi gửi
+            input.value = '';
+
+            // Tự hiển thị tin nhắn vừa gửi
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex justify-end';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'px-4 py-2 rounded-lg max-w-xs bg-blue-500 text-white';
+            bubble.textContent = content;
+
+            wrapper.appendChild(bubble);
+            messagesContainer.appendChild(wrapper);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        } catch (error) {
+            console.error('Lỗi gửi tin nhắn:', error);
+        }
+    });
+
+    // Lắng nghe tin nhắn từ người khác
+    console.log("Đang lắng nghe sự kiện trên channel:", `chat.${conversationId}`);
+
+    window.Echo.channel(`chat.${conversationId}`)
+        .listen('.ChatSent', (e) => {
+            console.log("🔥 Đã nhận được sự kiện ChatSent:", e);
+
+            const msg = e.message;
+            console.log("📩 Nội dung message:", msg);
+
+            if (msg.user_id === window.authUserId) {
+                console.log("🚫 Tin nhắn của chính mình, không hiển thị lại");
+                return;
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex justify-start';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'px-4 py-2 rounded-lg max-w-xs bg-gray-200 text-black';
+            bubble.textContent = msg.content;
+
+            wrapper.appendChild(bubble);
+            messagesContainer.appendChild(wrapper);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+    });
+</script>

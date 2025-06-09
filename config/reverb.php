@@ -36,17 +36,17 @@ return [
             'options' => [
                 'tls' => [],
             ],
-            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
+            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10000),
             'scaling' => [
                 'enabled' => env('REVERB_SCALING_ENABLED', false),
                 'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
                 'server' => [
                     'url' => env('REDIS_URL'),
                     'host' => env('REDIS_HOST', '127.0.0.1'),
-                    'port' => env('REDIS_PORT', '6379'),
+                    'port' => env('REDIS_PORT', 6379),
                     'username' => env('REDIS_USERNAME'),
                     'password' => env('REDIS_PASSWORD'),
-                    'database' => env('REDIS_DB', '0'),
+                    'database' => env('REDIS_DB', 0),
                 ],
             ],
             'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
@@ -60,9 +60,8 @@ return [
     | Reverb Applications
     |--------------------------------------------------------------------------
     |
-    | Here you may define how Reverb applications are managed. If you choose
-    | to use the "config" provider, you may define an array of apps which
-    | your server will support, including their connection credentials.
+    | Define the Reverb applications your server will support, including
+    | their connection credentials and options.
     |
     */
 
@@ -70,11 +69,15 @@ return [
 
         'provider' => 'config',
 
-        'apps' => [
+        'applications' => [
             [
+                'id' => env('REVERB_APP_ID'),
                 'key' => env('REVERB_APP_KEY'),
                 'secret' => env('REVERB_APP_SECRET'),
-                'app_id' => env('REVERB_APP_ID'),
+                'path' => env('REVERB_APP_PATH', ''),
+                'capacity' => null,
+                'enable_client_messages' => true,
+                'enable_statistics' => true,
                 'options' => [
                     'host' => env('REVERB_HOST'),
                     'port' => env('REVERB_PORT', 443),
@@ -84,7 +87,7 @@ return [
                 'allowed_origins' => ['*'],
                 'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
                 'activity_timeout' => env('REVERB_APP_ACTIVITY_TIMEOUT', 30),
-                'max_message_size' => env('REVERB_APP_MAX_MESSAGE_SIZE', 10_000),
+                'max_message_size' => env('REVERB_APP_MAX_MESSAGE_SIZE', 10000),
             ],
         ],
 
