@@ -47,7 +47,7 @@ class CategoryProductRepository extends BaseRepository
             ->with(['products' => function ($query) {
                 $query->where('status', 'accepted'); // Chỉ load sản phẩm có status accepted
             }])
-            ->first();
+            ->firstOrFail();
 
 
     }

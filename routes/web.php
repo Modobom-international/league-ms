@@ -64,6 +64,41 @@ Route::middleware(['cache.notification'])->group(function () {
 
 //exchange
 Route::get('exchange', [ExchangeController::class, 'index'])->name('exchange.home');
+Route::get('/exchange-login', [AuthController::class, 'showLoginForm'])->name('exchange.LoginForm');
+Route::post('/exchange-login', [AuthController::class, 'exchangeLogin'])->name('exchange.Login');
+Route::get('/exchange-register/', [AuthController::class, 'showRegisterForm'])->name('exchange.showRegisterForm');
+Route::post('/exchange-register/', [AuthController::class, 'exchangeRegister'])->name('exchange.Register');
+
+Route::middleware(['auth.exchange'])->group(function () {
+    // Logout
+    Route::get('/exchange-logout', [AuthController::class, 'exchangeLogout'])->name('exchangeLogout');
+
+    // Profile
+    Route::get('/user/profile', [ExchangeController::class, 'profile'])->name('exchange.profile');
+    Route::post('/profile/{id}/', [ExchangeController::class, 'update'])->name('exchange.update');
+    Route::get('/me/change-password', [ExchangeController::class, 'changePassword'])->name('exchange.changePassword');
+    Route::post('/profile/update-password', [ExchangeController::class, 'updatePassword'])->name('exchange.updatePassword');
+
+    // Bài đăng
+    Route::get('/manager-posts', [ExchangeController::class, 'managerPosts'])->name('exchange.managerPosts');
+    Route::get('/post-product', [ExchangeController::class, 'postProduct'])->name('exchange.postProduct');
+    Route::post('/store-post-product', [ExchangeController::class, 'storePostProduct'])->name('exchange.storePostProduct');
+    Route::get('/product/{slug}', [ExchangeController::class, 'editPostProduct'])->name('exchange.editPostProduct');
+    Route::post('/update-post-product/{slug}', [ExchangeController::class, 'updatePostProduct'])->name('exchange.updatePostProduct');
+    Route::delete('/delete/post-product/{id}', [ExchangeController::class, 'destroy'])->name('product.destroy');
+
+    // Chat
+    Route::get('/chat/product/{product}', [ExchangeController::class, 'chatWithSeller'])->name('chat.withSeller');
+    Route::get('/chat', [ExchangeController::class, 'listChat'])->name('chat.listChat');
+    Route::get('/chat/{conversation}', [ExchangeController::class, 'show'])->name('chat.show');
+    Route::post('/chat/{conversation}/send', [ExchangeController::class, 'send'])->name('chat.send');
+
+    // Fallback cho exchange
+    Route::fallback(function () {
+        return response()->view('errors.404-exchange', [], 404);
+    });
+});
+
 Route::get('exchange/about-us', [ExchangeController::class, 'aboutUs'])->name('exchange.aboutUs');
 Route::get('exchange/privacy-policy', [ExchangeController::class, 'privacyPolicy'])->name('exchange.privacyPolicy');
 Route::get('exchange/rule', [ExchangeController::class, 'rule'])->name('exchange.rule');
@@ -75,9 +110,7 @@ Route::get('/search', [ExchangeController::class, 'search'])->name('products.sea
 Route::get('/filter-by', [ExchangeController::class, 'filter'])->name('products.searchInProduct');
 Route::get('/products/load-more', [ExchangeController::class, 'loadMore'])->name('exchange.loadMore');
 
-Route::middleware(['auth:sanctum'])->group(function () {
 
-});
 //profile
 
 Route::get('/login/', [AuthController::class, 'login'])->name('login');
@@ -254,26 +287,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/accept-product', [ProductController::class, 'accept'])->name('product.accept');
     Route::get('/reject-product', [ProductController::class, 'reject'])->name('product.reject');
 
-    //exchange
-    Route::get('/user/profile', [ExchangeController::class, 'profile'])->name('exchange.profile');
 
-    Route::get('/manager-posts', [ExchangeController::class, 'managerPosts'])->name('exchange.managerPosts');
-    Route::post('/store-post-product/', [ExchangeController::class, 'storePostProduct'])->name('exchange.storePostProduct');
-    Route::get('/post-product', [ExchangeController::class, 'postProduct'])->name('exchange.postProduct');
-    Route::get('/product/{slug}', [ExchangeController::class, 'editPostProduct'])->name('exchange.editPostProduct');
-
-    Route::post('/update-post-product/{slug}', [ExchangeController::class, 'updatePostProduct'])->name('exchange.updatePostProduct');
-    Route::delete('delete/post-product/{id}', [ExchangeController::class, 'destroy'])->name('product.destroy');
-
-    Route::post('/profile/{id}/', [ExchangeController::class, 'update'])->name('exchange.update');
-    Route::get('/me/change-password/', [ExchangeController::class, 'changePassword'])->name('exchange.changePassword');
-    Route::post('/profile/update-password/', [ExchangeController::class, 'updatePassword'])->name('exchange.updatePassword');
-
-    //chatting
-    Route::get('/chat/product/{product}', [ExchangeController::class, 'chatWithSeller'])->name('chat.withSeller');
-    Route::get('/chat', [ExchangeController::class, 'listChat'])->name('chat.listChat');
-    Route::get('/chat/{conversation}', [ExchangeController::class, 'show'])->name('chat.show');
-    Route::post('/chat/{conversation}/send', [ExchangeController::class, 'send'])->name('chat.send');
 
 
 

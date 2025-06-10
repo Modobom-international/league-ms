@@ -207,7 +207,7 @@
                         </li>
 
                         <li class="nav-item mx-2">
-                            <a class="nav-link text-uppercase" href="{{ route('exchange.home') }}">{{ __('exchange') }}</a>
+                            <a class="nav-link text-uppercase" target="_blank" href="{{ route('exchange.home') }}">{{ __('exchange') }}</a>
                         </li>
 
                         @if (Auth::check() && Auth::user()->role == 'admin')

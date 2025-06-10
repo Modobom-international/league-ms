@@ -350,7 +350,7 @@ class ExchangeController extends Controller
             'password' => Hash::make($request->new_password)
         ]);
 
-        return back()->with("status", __("Password successfully changed!"));
+        return back()->with("success", __("Password successfully changed!"));
     }
 
     public function listChat()

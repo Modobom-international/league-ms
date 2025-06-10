@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'locale' => \App\Http\Middleware\Locale::class,
         // 'verified' => \App\Http\Middleware\VerifyEmail::class,
         'cache.notification' => \App\Http\Middleware\CacheNotification::class,
+        'auth.exchange' => \App\Http\Middleware\ExchangeAuthenticated::class,
     ];
 }

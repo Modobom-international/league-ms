@@ -113,6 +113,82 @@ class  AuthController extends Controller
         }
     }
 
+    public function showLoginForm()
+    {
+        return view('exchange.login');
+    }
+
+    public function exchangeLogin(LoginRequest $request)
+    {
+        $credentials = $request->only('email', 'password');
+        $remember = $request->filled('remember');
+
+        // ✅ Dùng guard 'canstum'
+        if (Auth::guard('canstum')->attempt($credentials, $remember)) {
+            $request->session()->put('email', $credentials['email']);
+
+            $user = Auth::guard('canstum')->user();
+
+            if ($user->role == Role::ADMIN) {
+                return redirect()->route('dashboard');
+            }
+
+            if ($request->has('return_url')) {
+                return redirect($request->get('return_url'));
+            }
+
+            return redirect()->route('exchange.home')->with("success", __("Login successfully!"));
+        }
+
+        // ❌ Sai thông tin đăng nhập
+        return back()->withErrors([
+            'custom' => __('Email or Password is wrong!')
+        ])->withInput($request->only('email', 'remember'));
+    }
+
+    public function exchangeLogout()
+    {
+        Session::flush();
+
+        Auth::guard('web')->logout();
+        return redirect()->route('exchange.LoginForm');
+    }
+
+    public function showRegisterForm()
+    {
+        return view('exchange.register');
+    }
+
+    public function exchangeRegister(RegisterRequest $request)
+    {
+        $user = User::create([
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'password' => Hash::make($request['password']),
+            'role' => Role::USER,
+            'title' => Title::USER,
+        ]);
+
+        $carbonNow = Carbon::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'));
+        $timeEnd = $carbonNow->addMinutes(60)->format('Y-m-d H:i:s');
+
+
+        $dataRanking = [
+            'user_id' => $user->id,
+            'points' => 0,
+            'places' => 0,
+            'places_old' => 0
+        ];
+        $this->rankingRepository->create($dataRanking);
+
+        Auth::loginUsingId($user->id);
+        if ($user->role == 'user') {
+            return \redirect()->route('exchange.home');
+        } else {
+            return \redirect()->route('dashboard');
+        }
+    }
+
     public function profile()
     {
         return view('page.user.profile');

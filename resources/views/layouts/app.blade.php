@@ -145,7 +145,7 @@
                                 </div>
                             </div>
                             <div class="text-center pt-2 border-t">
-                                <a href="{{ route('logout') }}">
+                                <a href="{{ route('exchangeLogout') }}">
                                     <button class="text-red-500 hover:underline text-base">Đăng xuất</button>
                                 </a>
                             </div>
@@ -156,8 +156,8 @@
                         + {{ __('POST NEW') }}
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="button white">{{ __('Log In') }}</a>
-                    <a href="{{ route('register_user') }}" class="button btn-register">{{ __('Register') }}</a>
+                    <a href="{{ route('exchange.LoginForm') }}" class="button white">{{ __('Log In') }}</a>
+                    <a href="{{route('exchange.showRegisterForm')}}" class="button btn-register">{{ __('Register') }}</a>
                 @endif
                 </div>
             </div>

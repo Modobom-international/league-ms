@@ -162,6 +162,8 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Laravel\Horizon\HorizonServiceProvider::class,
+        App\Providers\ViewServiceProvider::class,
+
 
         /*
          * Package Service Providers...
