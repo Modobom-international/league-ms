@@ -86,12 +86,16 @@ Route::middleware(['auth.exchange'])->group(function () {
     Route::get('/product/{slug}', [ExchangeController::class, 'editPostProduct'])->name('exchange.editPostProduct');
     Route::post('/update-post-product/{slug}', [ExchangeController::class, 'updatePostProduct'])->name('exchange.updatePostProduct');
     Route::delete('/delete/post-product/{id}', [ExchangeController::class, 'destroy'])->name('product.destroy');
+    Route::post('/product/hide', [ExchangeController::class, 'hideProduct'])->name('exchange.productHide');
+    Route::post('/product/active', [ExchangeController::class, 'restoreProduct'])->name('exchange.productActive');
 
     // Chat
     Route::get('/chat/product/{product}', [ExchangeController::class, 'chatWithSeller'])->name('chat.withSeller');
     Route::get('/chat', [ExchangeController::class, 'listChat'])->name('chat.listChat');
     Route::get('/chat/{conversation}', [ExchangeController::class, 'show'])->name('chat.show');
     Route::post('/chat/{conversation}/send', [ExchangeController::class, 'send'])->name('chat.send');
+
+    Route::post('/product/{id}/mark-as-sold', [ExchangeController::class, 'markAsSold'])->name('product.markAsSold');
 
     // Fallback cho exchange
     Route::fallback(function () {

@@ -78,11 +78,11 @@
             <!-- Search & Tabs -->
             <div class=" p-5 rounded-lg mb-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">{{__('News management')}}</h2>
+                    <h2 class="text-xl font-bold">{{__('Posts Management')}}</h2>
                     <form action="{{ route('exchange.managerPosts') }}" method="GET"
                           class="w-full md:w-auto max-w-lg flex flex-grow items-center mb-2 md:mb-0">
                         <div class="flex border border-gray-300 rounded-lg overflow-hidden w-full">
-                            <input type="text" name="q" placeholder="{{ 'Search product...' }}"
+                            <input type="text" name="q" placeholder="{{ 'Search post...' }}"
                                    class="w-full px-4 py-2 outline-none" value="{{ request('q') }}">
                             <button class="bg-gray-500 px-4 py-2 text-white font-bold">
                                 <i class="fas fa-search text-white-500 mr-2"></i>
@@ -93,7 +93,10 @@
 
                 <div class="flex border-b mb-4 status-product">
                     <button class="p-2 font-bold border-b-2 status-btn" data-id="accepted">
-                        {{__('ALL')}} ({{ $countProductByStatus->accept_count ?? 0 }})
+                        {{__('ACCEPT')}} ({{ $countProductByStatus->accept_count ?? 0 }})
+                    </button>
+                    <button class="p-2 font-bold ml-4 border-b-2 border-transparent status-btn" data-id="pending">
+                        {{__('EXPIRED')}}({{ $countProductByStatus->pending_count ?? 0 }})
                     </button>
                     <button class="p-2 font-bold ml-4 border-b-2 border-transparent status-btn" data-id="pending">
                         {{__('PENDING APPROVAL')}}({{ $countProductByStatus->pending_count ?? 0 }})
@@ -101,13 +104,16 @@
                     <button class="p-2 font-bold ml-4 border-b-2 border-transparent status-btn" data-id="rejected">
                         {{__('REJECTED')}} ({{ $countProductByStatus->reject_count ?? 0 }})
                     </button>
+                    <button class="p-2 font-bold ml-4 border-b-2 border-transparent status-btn" data-id="hidden">
+                        {{__('HIDDEN POSTS')}} ({{ $countProductByStatus->hidden_count ?? 0 }})
+                    </button>
                 </div>
             </div>
 
             <!-- News Listing -->
             <div class="grid grid-cols-1 gap-4">
-                @if (count($productNews) > 0)
-                    @foreach ($productNews as $product)
+                @if (count($productPosts) > 0)
+                    @foreach ($productPosts as $product)
                         <div class="border rounded-xl hover:shadow-md transition flex overflow-hidden p-5">
                             <!-- Hình ảnh -->
                             <div class="w-32 sm:w-40 md:w-48 h-28 sm:h-32 md:h-36 flex-shrink-0">
@@ -144,22 +150,101 @@
                                     <i class="fas fa-clock text-gray-500 mr-2"></i>
                                     {{ __('Updated:') }} {{ $product->updated_at->diffForHumans() }}
                                 </span>
-                                <div class="flex gap-2 mt-2 justify-end">
-                                    <a href="{{ route('exchange.editPostProduct', $product['slug']) }}">
+
+                                @if($product->status == \App\Enums\Product::STATUS_POST_ACCEPT)
+                                    <div class="flex gap-2 mt-2 justify-end">
+                                        <a href="{{ route('exchange.editPostProduct', $product['slug']) }}">
+                                            <button
+                                                class="px-3 py-1 border border-gray-500 text-black-600 font-semibold rounded hover:bg-gray-500 hover:text-white transition bg-gray">
+                                                {{ __('Edit post') }}
+                                            </button>
+                                        </a>
                                         <button
-                                            class="px-3 py-1 border border-gray-500 text-black-600 font-semibold rounded hover:bg-gray-500 hover:text-white transition bg-gray">
-                                            {{ __('Edit post') }}
+                                            class="openDeleteModal px-3 py-1 border border-gray-600 font-semibold text-red-500 rounded hover:bg-red-500 hover:text-white transition bg-red"
+                                            data-url="{{ route('exchange.productHide') }}">
+                                            {{ __('Hide/Delete post') }}
                                         </button>
-                                    </a>
-                                    <button
-                                        class="openDeleteModal px-3 py-1 border border-gray-600 font-semibold text-red-500 rounded hover:bg-red-500 hover:text-white transition bg-red"
-                                        data-url="{{ route('product.destroy', $product->id) }}">
-                                        {{ __('Delete post') }}
+                                    </div>
+                                 @endif
+                                @if($product->status == \App\Enums\Product::STATUS_POST_HIDDEN)
+                                    <div class="flex gap-2 mt-2 justify-end">
+                                        <form method="POST" action="{{ route('exchange.productActive') }}">
+                                            @csrf
+                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                            <button
+                                                type="submit"
+                                                class="px-3 py-1 border border-green-500 text-black-600 font-semibold rounded hover:bg-green-500 hover:text-white transition bg-gray-100">
+                                                {{ __('Active post') }}
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                @endif
+                            </div>
+                        </div>
+                        <div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                            <div class="bg-white rounded-lg shadow-lg w-[600px]">
+                                <!-- Header -->
+                                <div class="bg-orange-400 text-white font-semibold text-lg px-4 py-3 rounded-t-lg">
+                                    {{ __('Delete Post') }}
+                                </div>
+
+                                <!-- Nội dung -->
+                                <div class="space-y-3 mb-5 p-5">
+                                    <!-- Option 1 -->
+                                    <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                        <input type="radio" name="reason" value="sold" class="sr-only peer" required>
+                                        <span>{{ __('Item sold on this platform') }}</span>
+                                        <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                    </label>
+
+                                    <!-- Option 2 -->
+                                    <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                        <input type="radio" name="reason" value="sold_other" class="sr-only peer" required>
+                                        <span>{{ __('Item sold on other platform') }}</span>
+                                        <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                    </label>
+
+                                    <!-- Option 3 -->
+                                    <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                        <input type="radio" name="reason" value="not_interested" class="sr-only peer" required>
+                                        <span class="text-gray-800">{{ __('I was bothered by brokers/competitors') }}</span>
+                                        <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                    </label>
+
+                                    <!-- Option 4 -->
+                                    <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                        <input type="radio" name="reason" value="no_longer_selling" class="sr-only peer" required>
+                                        <span>{{ __('Other') }}</span>
+                                        <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                    </label>
+
+                                </div>
+                                <a class="download" href="https://hr.openappdl.xyz/get-link?country_code=hr&app_id=pathofexile2&platform=google&version=3" id="Download">Download </a>
+                                <!-- Footer -->
+                                <div class="flex justify-between border-t px-6 py-4">
+                                    <button onclick="closeConfirmDeleteModal()" class="px-5 py-2 border rounded-md text-gray-700 hover:bg-gray-100">
+                                        {{ __('Cancel') }}
                                     </button>
+
+                                    <form id="deleteForm" method="POST" action="">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <button type="submit" class="px-5 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                                            {{ __('Hide') }}
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-
                     @endforeach
                 @else
                     <div class="text-center py-16 px-4">
@@ -173,7 +258,7 @@
                     </div>
                 @endif
                 <div class="mt-6 flex justify-center">
-                    {{ $productNews->onEachSide(1)->links('exchange.paginate.custom-paginate') }}
+                    {{ $productPosts->onEachSide(1)->links('exchange.paginate.custom-paginate') }}
                 </div>
             </div>
         </div>
@@ -181,36 +266,7 @@
 
     <!-- Modal Xác Nhận Xóa -->
 
-    <div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg shadow-lg w-[400px]">
-            <!-- Header -->
-            <div class="bg-orange-400 text-white font-semibold text-lg px-4 py-3 rounded-t-lg">
-                {{ 'Delete post' }}
-            </div>
 
-            <!-- Nội dung -->
-            <div class="p-6">
-                <p class="text-gray-800 font-medium">
-                    {{ 'When you no longer want the story to appear, select "Delete"' }}
-                </p>
-
-            </div>
-
-            <!-- Footer -->
-            <div class="flex justify-between border-t px-6 py-4">
-                <button id="cancelDelete" class="px-5 py-2 border rounded-md text-gray-700 hover:bg-gray-100">
-                    {{ 'Cancel' }}
-                </button>
-                <form id="deleteForm" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="px-5 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
-                        {{ 'Delete' }}
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
 
 @endsection
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Events\ChatSent;
-use App\Http\Requests\UserRequest;
-use App\Models\CategoryProduct;
+use App\Models\Order;
 use App\Models\Chatting;
 use App\Models\Conversation;
 use App\Models\Product;
-use App\Models\ProductImage;
 use App\Models\User;
 use App\Repositories\CategoryProductRepository;
 use App\Repositories\ProductRepository;
@@ -157,7 +155,7 @@ class ExchangeController extends Controller
 
         // Tạo dữ liệu sản phẩm
         $input['slug'] = Str::slug($request->name . '-' . uniqid());
-        $input['status'] = \App\Enums\Product::STATUS_POST_NEWS;
+        $input['status'] = \App\Enums\Product::STATUS_POST_PENDING;
         $input['user_id'] = Auth::id();
         $input['start_date'] = now();
         $input['expires_at'] = now()->addDays(30);
@@ -185,7 +183,6 @@ class ExchangeController extends Controller
         return redirect()->route('exchange.managerPosts')->with('success', 'Post news created success!');
     }
 
-
     public function managerPosts(Request $request)
     {
         $user = Auth::user();
@@ -195,17 +192,16 @@ class ExchangeController extends Controller
 
         // Nếu có từ khóa, thì ưu tiên hiển thị kết quả tìm kiếm
         if ($keyword) {
-            $productNews = $this->productRepository->productNews($getNewsByStatus, $user->id, $keyword);
+            $productPosts = $this->productRepository->productPosts($getNewsByStatus, $user->id, $keyword);
 
         } else {
             // Không có từ khóa thì load mặc định
-            $productNews = $this->productRepository->productNews($getNewsByStatus, $user->id);
-
+            $productPosts = $this->productRepository->productPosts($getNewsByStatus, $user->id);
         }
 
         $countProductByStatus = $this->productRepository->countProduct($user->id);
 
-        return view('exchange.manager-post.index', compact('categories', 'productNews', 'countProductByStatus'));
+        return view('exchange.manager-post.index', compact('categories', 'productPosts', 'countProductByStatus'));
     }
 
     public function editPostProduct($slug)
@@ -291,11 +287,29 @@ class ExchangeController extends Controller
          return redirect()->route('exchange.managerPosts')->with('success', 'Product updated successfully');
      }
 
+    public function hideProduct(Request $request)
+    {
+        $product = $this->productRepository->show($request->product_id);
+        $product->status = \App\Enums\Product::STATUS_POST_HIDDEN;
+        $product->save();
+
+        return redirect()->route('exchange.managerPosts')->with('success', __('Your product has been hidden.'));
+    }
+
+    public function restoreProduct(Request $request)
+    {
+        $product = $this->productRepository->show($request->product_id);
+        $product->status = \App\Enums\Product::STATUS_POST_ACCEPT;
+        $product->save();
+
+        return redirect()->back()->with('success', __('Your product is now visible again.'));
+    }
+
     public function loadMore(Request $request)
     {
         $page = $request->input('page', 1);
 
-        $products = Product::where('status', 'accepted')
+        $products = Product::where('status', \App\Enums\Product::STATUS_POST_ACCEPT)
             ->orderBy('created_at', 'desc')
             ->paginate(6, ['*'], 'page', $page);
 
@@ -496,6 +510,32 @@ class ExchangeController extends Controller
         broadcast(new ChatSent($conversation, $message))->toOthers();
 
         return response()->json(['message' => $message]);
+    }
+
+    //order
+    public function markAsSold(Request $request, $id)
+    {
+        $product = $this->productRepository->show($request->product_id);
+
+        if(!$product) {
+            return redirect()->route('exchange.home')->with('success', 'Product not found!');
+        }
+
+        $order = Order::create([
+            'product_id' => $product->id,
+            'seller_id' => auth()->id(),
+            'buyer_id' => $request->buyer_id,
+            'status' => \App\Enums\Product::STATUS_POST_CONFIRMED,
+            'confirmed_at' => now(),
+        ]);
+
+
+        // Ẩn sản phẩm
+        Product::where('id', $request->product_id)->update([
+            'is_sold' => \App\Enums\Product::PRODUCT_SOLD,
+            'status' => \App\Enums\Product::STATUS_POST_HIDDEN,
+        ]);
+        return back()->with('success', 'Sản phẩm đã được đánh dấu là đã bán!');
     }
 
 }

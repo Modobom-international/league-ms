@@ -129,10 +129,6 @@ class  AuthController extends Controller
 
             $user = Auth::guard('canstum')->user();
 
-            if ($user->role == Role::ADMIN) {
-                return redirect()->route('dashboard');
-            }
-
             if ($request->has('return_url')) {
                 return redirect($request->get('return_url'));
             }

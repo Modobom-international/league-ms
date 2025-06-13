@@ -131,12 +131,14 @@ class ProductRepository extends BaseRepository
 
 // Phân trang kết quả
         return $query->paginate(12);
-
     }
 
     public function homeExchange()
     {
-        return $this->model->with('categories', 'brands')->where('status', 'accepted')->orderBy('created_at', 'desc') ->take(9)->get();
+        return $this->model->with('categories', 'brands')
+            ->where('status', 'accepted')
+            ->where('is_sold', 'sold')
+            ->orderBy('created_at', 'desc') ->take(9)->get();
     }
 
     public function recommend($excludeIds)
@@ -147,20 +149,23 @@ class ProductRepository extends BaseRepository
             ->get();
     }
 
-    public function productNews($getNewsByStatus = null, $user, $keyword = null)
+    public function productPosts($getPostsByStatus = null, $user, $keyword = null)
     {
         $query = $this->model->with('categories', 'brands')
             ->where('user_id', $user)
             ->orderBy('start_date', 'asc');
 
         // Lọc theo trạng thái
-        if ($getNewsByStatus == 'accepted') {
+        if ($getPostsByStatus == 'accepted') {
             $query->where('status', 'accepted');
-        } elseif ($getNewsByStatus == 'pending') {
+        } elseif ($getPostsByStatus == 'pending') {
             $query->where('status', 'pending');
-        } elseif ($getNewsByStatus == 'rejected') {
+        } elseif ($getPostsByStatus == 'rejected') {
             $query->where('status', 'rejected');
-        } else {
+        } elseif ($getPostsByStatus == 'hidden') {
+            $query->where('status', 'hidden');
+        }
+        else {
             $query->where('status', 'accepted');
         }
 
@@ -182,7 +187,8 @@ class ProductRepository extends BaseRepository
             ->selectRaw("
             SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count,
             SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END) as accept_count,
-            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as reject_count
+            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as reject_count,
+            SUM(CASE WHEN status = 'hidden' THEN 1 ELSE 0 END) as hidden_count
         ")
         ->first();
     }

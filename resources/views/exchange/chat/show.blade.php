@@ -131,20 +131,106 @@
                     </div>
                 </div>
 
-                <div class="flex p-3">
-                    <div>
+                <div class="flex justify-between items-center p-3 border-b">
+                    {{-- Thông tin sản phẩm --}}
+                    <div class="flex items-center">
                         @php
                             $images = json_decode($product->images, true) ?? [];
-                            $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                            $mainImage = $images[0] ?? '/images/no-image.png';
                         @endphp
-                        <img class="image w-[3rem] rounded-lg" src="{{ asset($mainImage) }}" alt="avatar">
+                        <img class="w-[3rem] h-[3rem] object-cover rounded-lg" src="{{ asset($mainImage) }}" alt="avatar">
+
+                        <div class="ml-4">
+                            <div class="text-sm text-black font-semibold">{{ $product->name }}</div>
+                            <div class="font-semibold text-orange-600">{{ number_format($product->price) }} đ</div>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <div class="text-sm text-black-600">{{ $product->name }}</div>
-                        <div class="font-semibold text-orange-600">{{ number_format($product->price) }} đ</div>
+
+                    {{-- Nút đánh dấu đã bán --}}
+                    <div>
+                        @if ($product->is_sold)
+                            <span class="bg-gray-500 text-white px-3 py-1 rounded-full text-xs">Đã bán</span>
+                        @else
+                            @if(($authUser->id == $product->user_id))
+                            <button
+                                onclick="openModal({{ $product->id }})"
+                                class="bg-gray-500 hover:~bg-gray-500/5-600 text-white text-xs px-3 py-1 rounded-lg"
+                            >
+                                Đã bán / Ẩn tin
+                            </button>
+                        @endif
+                        @endif
                     </div>
                 </div>
-                <hr class="mt-2">
+
+                <div id="markAsSoldModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center hidden">
+                    <div class="bg-white rounded-lg w-full max-w-md p-6 shadow-lg">
+                        <h2 class="text-xl text-center font-bold mb-5">{{ __('Hide Listing') }}</h2>
+                        <form id="markAsSoldForm" method="POST" action="{{route('product.markAsSold', $product->id)}}">
+                            @csrf
+                            <input type="hidden" name="product_id" id="modal_product_id">
+                            <input type="hidden" name="buyer_id" value="{{$partner->id}}">
+
+                            <div class="space-y-3 mb-5">
+                                <!-- Option 1 -->
+                                <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                    <input type="radio" name="reason" value="sold" class="sr-only peer" required>
+                                    <span class="text-gray-800">{{ __('Sold via Badminton') }}</span>
+                                    <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                </label>
+
+                                <!-- Option 2 -->
+                                <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                    <input type="radio" name="reason" value="sold_other" class="sr-only peer" required>
+                                    <span class="text-gray-800">{{ __('Sold through other channels') }}</span>
+                                    <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                </label>
+
+                                <!-- Option 3 -->
+                                <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                    <input type="radio" name="reason" value="not_interested" class="sr-only peer" required>
+                                    <span class="text-gray-800">{{ __('I was bothered by brokers/competitors') }}</span>
+                                    <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                </label>
+
+                                <!-- Option 4 -->
+                                <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                    <input type="radio" name="reason" value="no_longer_selling" class="sr-only peer" required>
+                                    <span class="text-gray-800">{{ __('I no longer want to sell') }}</span>
+                                    <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                </label>
+
+                                <!-- Option 5 -->
+                                <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                    <input type="radio" name="reason" value="other" class="sr-only peer" required>
+                                    <span class="text-gray-800">{{ __('Other') }}</span>
+                                    <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                </label>
+                            </div>
+
+                            <div class="text-sm text-red-500 mb-4">
+                                <strong>{{ __('Note:') }}</strong> {{ __('Listing and promotion fees will not be refunded when you hide the listing.') }}
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300">{{ __('Cancel') }}</button>
+                                <button type="submit" class="px-5 py-2 text-white bg-orange-500 rounded hover:bg-orange-600 font-semibold">
+                                    {{ __('Hide Listing') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
                 <!-- Messages -->
                 <div id="chat-box" data-conversation-id="{{ $conversation->id }}" class="flex-1 overflow-y-auto p-4 space-y-2 bg-black-50">
@@ -268,4 +354,16 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
     });
+</script>
+<script>
+    function openModal(productId) {
+        document.getElementById('modal_product_id').value = productId;
+        document.getElementById('markAsSoldForm').action = '/product/' + productId + '/mark-as-sold'; // Route xử lý
+        document.getElementById('markAsSoldModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('markAsSoldModal').classList.add('hidden');
+        document.getElementById('markAsSoldForm').reset();
+    }
 </script>

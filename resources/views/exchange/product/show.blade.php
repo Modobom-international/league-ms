@@ -124,7 +124,7 @@
                                 <!-- Nút Delete -->
                                 <button
                                     class="w-1/2 flex items-center justify-center gap-2 border border-red-500 text-red-500 px-4 py-2 rounded-lg text-base font-semibold hover:bg-red-500 hover:text-white transition openDeleteModal"
-                                    data-url="{{ route('product.destroy', $product->id) }}"
+                                    data-url="{{ route('exchange.productHide') }}"
                                 >
                                     <i class="fas fa-trash-alt"></i>
                                     <span>{{ __('Sold/Delete') }}</span>
@@ -141,49 +141,59 @@
                             </div>
                         </div>
                         <div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-                            <div class="bg-white rounded-lg shadow-lg w-[400px]">
+                            <div class="bg-white rounded-lg shadow-lg w-[600px]">
                                 <!-- Header -->
                                 <div class="bg-orange-400 text-white font-semibold text-lg px-4 py-3 rounded-t-lg">
                                     {{ 'Hide post' }}
                                 </div>
-                                <!-- Nội dung -->
-                                <div class="p-6 space-y-3">
-                                    <p class="text-gray-800 font-medium mb-2">{{ __('Please select the reason for hiding this post:') }}</p>
-                                    <div class="space-y-2">
-                                        <label class="flex items-center space-x-2">
-                                            <input type="radio" name="hide_reason" value="sold_on_platform" class="form-radio text-blue-600">
-                                            <span>{{ __('Item sold on this platform') }}</span>
-                                        </label>
-                                        <label class="flex items-center space-x-2">
-                                            <input type="radio" name="hide_reason" value="sold_elsewhere" class="form-radio text-blue-600">
-                                            <span>{{ __('Item sold on other platform') }}</span>
-                                        </label>
-                                        <label class="flex items-center space-x-2">
-                                            <input type="radio" name="hide_reason" value="no_longer_interested" class="form-radio text-blue-600">
-                                            <span>{{ __('No longer interested in selling') }}</span>
-                                        </label>
-                                        <label class="flex items-center space-x-2">
-                                            <input type="radio" name="hide_reason" value="not_effective" class="form-radio text-blue-600">
-                                            <span>{{ __('Listing not effective / poor results') }}</span>
-                                        </label>
-                                        <label class="flex items-center space-x-2">
-                                            <input type="radio" name="hide_reason" value="other" class="form-radio text-blue-600">
-                                            <span>{{ __('Other') }}</span>
-                                        </label>
-                                    </div>
+                                <div class="space-y-3 mb-5 p-5">
+                                    <!-- Option 1 -->
+                                    <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                        <input type="radio" name="reason" value="sold" class="sr-only peer" required>
+                                        <span>{{ __('Item sold on this platform') }}</span>
+                                        <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                    </label>
+
+                                    <!-- Option 2 -->
+                                    <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                        <input type="radio" name="reason" value="sold_other" class="sr-only peer" required>
+                                        <span>{{ __('Item sold on other platform') }}</span>
+                                        <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                    </label>
+
+                                    <!-- Option 3 -->
+                                    <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                        <input type="radio" name="reason" value="not_interested" class="sr-only peer" required>
+                                        <span class="text-gray-800">{{ __('I was bothered by brokers/competitors') }}</span>
+                                        <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                    </label>
+
+                                    <!-- Option 4 -->
+                                    <label class="flex items-center justify-between border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-orange-500 relative">
+                                        <input type="radio" name="reason" value="no_longer_selling" class="sr-only peer" required>
+                                        <span>{{ __('Other') }}</span>
+                                        <span class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-orange-500">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full hidden peer-checked:inline-block"></span>
+                    </span>
+                                    </label>
+
                                 </div>
-
-
                                 <!-- Footer -->
                                 <div class="flex justify-between border-t px-6 py-4">
                                     <button id="cancelDelete" class="px-5 py-2 border rounded-md text-gray-700 hover:bg-gray-100">
                                         {{ 'Cancel' }}
                                     </button>
-                                    <form id="deleteForm" method="POST">
+                                    <form id="deleteForm" method="POST" action="">
                                         @csrf
-                                        @method('DELETE')
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
                                         <button type="submit" class="px-5 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
-                                            {{ 'Hide' }}
+                                            {{ __('Hide') }}
                                         </button>
                                     </form>
                                 </div>
@@ -342,35 +352,36 @@
 </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Đây là mảng ảnh, được Laravel render thành JS array
-            const images = @json($images);
+            const images = @json($images); // Mảng từ PHP
             const mainImage = document.getElementById("firstImage");
-            console.log(mainImage)
             const prevBtn = document.getElementById("prevBtn");
-            console.log(prevBtn)
             const nextBtn = document.getElementById("nextBtn");
-            console.log(nextBtn)
             let currentIndex = 0;
 
             function updateImage() {
                 mainImage.src = images[currentIndex]
-                    ? `{{ asset('') }}` + images[currentIndex]
+                    ? `{{ asset('') }}` + images[currentIndex].replace(/^\/+/, '')
                     : '';
             }
 
-            prevBtn.addEventListener("click", function () {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    updateImage();
-                }
-            });
+            if (mainImage && prevBtn && nextBtn) {
+                prevBtn.addEventListener("click", function () {
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        updateImage();
+                    }
+                });
 
-            nextBtn.addEventListener("click", function () {
-                if (currentIndex < images.length - 1) {
-                    currentIndex++;
-                    updateImage();
-                }
-            });
+                nextBtn.addEventListener("click", function () {
+                    if (currentIndex < images.length - 1) {
+                        currentIndex++;
+                        updateImage();
+                    }
+                });
+
+                updateImage(); // Load ảnh đầu tiên khi vào trang
+            }
         });
     </script>
+
 @endsection
