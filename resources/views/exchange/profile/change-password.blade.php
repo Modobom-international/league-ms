@@ -1,69 +1,13 @@
 @extends('layouts.app')
-
-
 @section('content')
 
     <div class="flex gap-6 p-6 bg-gray-100">
         <!-- Sidebar -->
-        <div class="w-80 bg-white shadow-md rounded-md overflow-hidden text-lg">
-            <!-- Thông tin người dùng -->
-            <div class="p-4 text-center border-b">
-                <li class="p-3 flex items-center gap-2 text-black-500">
-                    <img src="{{ Auth::user()->profile_photo_path ? asset(Auth::user()->profile_photo_path) : asset('/images/no-image.png') }}"
-                         alt="Avatar" width="40" height="40" class="rounded-full me-2" /> {{ Auth::user()->name }}
-                </li>
-            </div>
-            <!-- Tiện ích -->
-            <div class="bg-gray-100 px-4 py-2 text-black-600 text-xm font-semibold">{{__(' Utilities')}}</div>
-            <ul class="divide-y">
-                <a href="{{ route('exchange.managerPosts') }}">
-                    <li
-                        class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
-                        <i class="fas fa-file-alt"></i>{{__('News management')}}
-                    </li>
-                </a>
-                <li
-                    class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
-                    <i class="fas fa-clock"></i> {{__('Transaction History')}}
-                </li>
-            </ul>
-
-            <!-- Cá nhân -->
-            <div class="bg-gray-100 px-4 py-2 text-black-600 text-xm font-semibold">{{__('Profile')}} </div>
-            <ul class="divide-y">
-                <li
-                    class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
-                    <i class="fas fa-heart"></i>{{__(' Favorite news')}}
-                </li>
-                <li
-                    class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
-                    <i class="fas fa-search"></i>{{__(' Saved searches')}}
-                </li>
-                <a href="{{ route('exchange.profile') }}">
-                    <li
-                        class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
-                        <i class="fas fa-info-circle"></i>{{__('Account information')}}
-                    </li>
-                </a>
-                <a href="{{ route('exchange.changePassword') }}">
-                    <li
-                        class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
-                        <i class="fas fa-lock"></i>{{__('Change Password')}}
-                    </li>
-                </a>
-                <a href="{{ route('logout') }}">
-                    <li
-                        class="p-3 flex items-center gap-2 text-gray-500 font-semibold hover:bg-orange-100 hover:text-orange-700 transition">
-                        <i class="fas fa-sign-out-alt"></i> {{__("Log out")}}
-                    </li>
-                </a>
-            </ul>
-        </div>
-        <div class="container mx-auto mx-auto  ">
+        <div class="container mx-auto mx-auto  " style="max-width: 1250px !important; ">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">{{__('Change Password')}}</h2>
 
             <form action="{{ route('update-password') }}" method="POST" class="md:col-span-3 bg-white rounded shadow p-6 space-y-6" >
                 @csrf
-                <h2 class="text-xl font-semibold">{{__('Change Password')}}</h2>
                 @if (session('status'))
                     <div class="mb-4 text-green-600 text-base font-medium">
                         {{ session('status') }}

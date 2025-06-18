@@ -17,6 +17,11 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\User\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Exchange\HomepageController;
+use App\Http\Controllers\Exchange\OrderController;
+use App\Http\Controllers\Exchange\ChatController;
+use App\Http\Controllers\Exchange\ProductController as ExchangeProductController;;
+use App\Http\Controllers\Exchange\UserController as ExchangeUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,59 +68,57 @@ Route::middleware(['cache.notification'])->group(function () {
 });
 
 //exchange
-Route::get('exchange', [ExchangeController::class, 'index'])->name('exchange.home');
+
 Route::get('/exchange-login', [AuthController::class, 'showLoginForm'])->name('exchange.LoginForm');
 Route::post('/exchange-login', [AuthController::class, 'exchangeLogin'])->name('exchange.Login');
 Route::get('/exchange-register/', [AuthController::class, 'showRegisterForm'])->name('exchange.showRegisterForm');
 Route::post('/exchange-register/', [AuthController::class, 'exchangeRegister'])->name('exchange.Register');
 
+Route::get('exchange', [HomePageController::class, 'index'])->name('exchange.home');
+Route::get('exchange/about-us', [HomePageController::class, 'aboutUs'])->name('exchange.aboutUs');
+Route::get('exchange/privacy-policy', [HomePageController::class, 'privacyPolicy'])->name('exchange.privacyPolicy');
+Route::get('exchange/rule', [HomePageController::class, 'rule'])->name('exchange.rule');
+Route::get('/post/{slug}', [HomePageController::class, 'productDetail'])->name('exchange.productDetail');
+Route::get('/category/{slug}', [HomePageController::class, 'categoryDetail'])->name('exchange.categoryDetail');
+Route::get('/search', [HomePageController::class, 'search'])->name('products.search');
+Route::get('/filter-by', [HomePageController::class, 'filter'])->name('products.searchInProduct');
+Route::get('/products/load-more', [HomePageController::class, 'loadMore'])->name('exchange.loadMore');
 Route::middleware(['auth.exchange'])->group(function () {
-    // Logout
-    Route::get('/exchange-logout', [AuthController::class, 'exchangeLogout'])->name('exchangeLogout');
 
     // Profile
-    Route::get('/user/profile', [ExchangeController::class, 'profile'])->name('exchange.profile');
-    Route::post('/profile/{id}/', [ExchangeController::class, 'update'])->name('exchange.update');
-    Route::get('/me/change-password', [ExchangeController::class, 'changePassword'])->name('exchange.changePassword');
-    Route::post('/profile/update-password', [ExchangeController::class, 'updatePassword'])->name('exchange.updatePassword');
+    Route::get('/user/profile', [ExchangeUserController::class, 'profile'])->name('exchange.profile');
+    Route::post('/profile/{id}/', [ExchangeUserController::class, 'update'])->name('exchange.update');
+    Route::get('/me/change-password', [ExchangeUserController::class, 'changePassword'])->name('exchange.changePassword');
+    Route::post('/profile/update-password', [ExchangeUserController::class, 'updatePassword'])->name('exchange.updatePassword');
+    Route::get('/exchange-logout', [ExchangeUserController::class, 'exchangeLogout'])->name('exchangeLogout');
 
-    // Bài đăng
-    Route::get('/manager-posts', [ExchangeController::class, 'managerPosts'])->name('exchange.managerPosts');
-    Route::get('/post-product', [ExchangeController::class, 'postProduct'])->name('exchange.postProduct');
-    Route::post('/store-post-product', [ExchangeController::class, 'storePostProduct'])->name('exchange.storePostProduct');
-    Route::get('/product/{slug}', [ExchangeController::class, 'editPostProduct'])->name('exchange.editPostProduct');
-    Route::post('/update-post-product/{slug}', [ExchangeController::class, 'updatePostProduct'])->name('exchange.updatePostProduct');
-    Route::delete('/delete/post-product/{id}', [ExchangeController::class, 'destroy'])->name('product.destroy');
-    Route::post('/product/hide', [ExchangeController::class, 'hideProduct'])->name('exchange.productHide');
-    Route::post('/product/active', [ExchangeController::class, 'restoreProduct'])->name('exchange.productActive');
+    // Post
+    Route::get('/manager-posts', [ExchangeProductController::class, 'managerPosts'])->name('exchange.managerPosts');
+    Route::get('/post-product', [ExchangeProductController::class, 'postProduct'])->name('exchange.postProduct');
+    Route::post('/store-post-product', [ExchangeProductController::class, 'storePostProduct'])->name('exchange.storePostProduct');
+    Route::get('/product/{slug}', [ExchangeProductController::class, 'editPostProduct'])->name('exchange.editPostProduct');
+    Route::post('/update-post-product/{slug}', [ExchangeProductController::class, 'updatePostProduct'])->name('exchange.updatePostProduct');
+    Route::delete('/delete/post-product/{id}', [ExchangeProductController::class, 'destroy'])->name('product.destroy');
+    Route::post('/product/hide', [ExchangeProductController::class, 'hideProduct'])->name('exchange.productHide');
+    Route::post('/product/active', [ExchangeProductController::class, 'restoreProduct'])->name('exchange.productActive');
+    Route::post('/product/{id}/mark-as-sold', [ExchangeProductController::class, 'markAsSold'])->name('product.markAsSold');
+
+    //order
+    Route::get('/transaction-history', [OrderController::class, 'transactionHistory'])->name('transactionHistory');
+    Route::get('/my-order/buy', [OrderController::class, 'orderBuy'])->name('orderBuy');
+    Route::get('/my-order/sell', [OrderController::class, 'orderSell'])->name('orderSell');
 
     // Chat
-    Route::get('/chat/product/{product}', [ExchangeController::class, 'chatWithSeller'])->name('chat.withSeller');
-    Route::get('/chat', [ExchangeController::class, 'listChat'])->name('chat.listChat');
-    Route::get('/chat/{conversation}', [ExchangeController::class, 'show'])->name('chat.show');
-    Route::post('/chat/{conversation}/send', [ExchangeController::class, 'send'])->name('chat.send');
-
-    Route::post('/product/{id}/mark-as-sold', [ExchangeController::class, 'markAsSold'])->name('product.markAsSold');
+    Route::get('/chat/product/{product}', [ChatController::class, 'chatWithSeller'])->name('chat.withSeller');
+    Route::get('/chat', [ChatController::class, 'listChat'])->name('chat.listChat');
+    Route::get('/chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
+    Route::post('/chat/{conversation}/send', [ChatController::class, 'send'])->name('chat.send');
 
     // Fallback cho exchange
     Route::fallback(function () {
         return response()->view('errors.404-exchange', [], 404);
     });
 });
-
-Route::get('exchange/about-us', [ExchangeController::class, 'aboutUs'])->name('exchange.aboutUs');
-Route::get('exchange/privacy-policy', [ExchangeController::class, 'privacyPolicy'])->name('exchange.privacyPolicy');
-Route::get('exchange/rule', [ExchangeController::class, 'rule'])->name('exchange.rule');
-//product
-
-Route::get('/post/{slug}', [ExchangeController::class, 'productDetail'])->name('exchange.productDetail');
-Route::get('/category/{slug}', [ExchangeController::class, 'categoryDetail'])->name('exchange.categoryDetail');
-Route::get('/search', [ExchangeController::class, 'search'])->name('products.search');
-Route::get('/filter-by', [ExchangeController::class, 'filter'])->name('products.searchInProduct');
-Route::get('/products/load-more', [ExchangeController::class, 'loadMore'])->name('exchange.loadMore');
-
-
-//profile
 
 Route::get('/login/', [AuthController::class, 'login'])->name('login');
 Route::post('/custom-login/', [AuthController::class, 'customLogin'])->name('login.custom');

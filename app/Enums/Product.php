@@ -19,4 +19,5 @@ final class Product
     const STATUS_POST_REJECT = "reject";
     const STATUS_POST_CONFIRMED = "confirmed";
     const PRODUCT_SOLD = "sold";
+    const PRODUCT_IN_STOCK = "in_stock";
 }

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Product;
+use Illuminate\Support\Facades\App;
 
 class ProductRepository extends BaseRepository
 {
@@ -136,9 +137,16 @@ class ProductRepository extends BaseRepository
     public function homeExchange()
     {
         return $this->model->with('categories', 'brands')
-            ->where('status', 'accepted')
-            ->where('is_sold', 'sold')
+            ->where('is_sold', \App\Enums\Product::PRODUCT_IN_STOCK)
+            ->where('status', \App\Enums\Product::STATUS_POST_ACCEPT)
             ->orderBy('created_at', 'desc') ->take(9)->get();
+    }
+
+    public function loadMore($page)
+    {
+        return $this->model->where('status', \App\Enums\Product::STATUS_POST_ACCEPT)
+            ->orderBy('created_at', 'desc')
+            ->paginate(6, ['*'], 'page', $page);
     }
 
     public function recommend($excludeIds)
@@ -180,8 +188,7 @@ class ProductRepository extends BaseRepository
         return $query->paginate(5); // Phân trang 5 sản phẩm mỗi trang
     }
 
-
-        public function countProduct($user)
+    public function countProduct($user)
     {
         return $this->model->where('user_id', $user)
             ->selectRaw("

@@ -12,7 +12,7 @@
             <a href="{{route('exchange.productDetail', $product['slug'])}}">
                 <h3 class=" text-xl font-semibold line-clamp-2">{{ $product->name }}</h3>
             </a>
-            <div class="flex justify-between items-center text-red-600 font-semibold mt-4">
+            <div class="flex justify-between items-center text-red-600 font-semibold mt-2">
                 <p class="text-xl">{{ number_format($product->price, 0, ',', '.') }} đ</p>
             </div>
             <div class="flex items-center gap-2 text-sm text-gray-600">

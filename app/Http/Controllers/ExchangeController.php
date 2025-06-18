@@ -538,4 +538,38 @@ class ExchangeController extends Controller
         return back()->with('success', 'Sản phẩm đã được đánh dấu là đã bán!');
     }
 
+    public function transactionHistory()
+    {
+        $userId = auth()->id();
+
+        $history = Order::where('buyer_id', $userId)
+            ->orWhere('seller_id', $userId)
+            ->latest()
+            ->get();
+
+        return view('transactions.history', compact('history'));
+    }
+
+    public function orderBuy()
+    {
+        $userId = auth()->id();
+
+        $purchases = Order::where('buyer_id', $userId)
+            ->latest()
+            ->get();
+
+        return view('transactions.purchases', compact('purchases'));
+    }
+
+    public function orderSell()
+    {
+        $userId = auth()->id();
+
+        $sales = Order::where('seller_id', $userId)
+            ->latest()
+            ->get();
+
+        return view('transactions.sales', compact('sales'));
+    }
+
 }

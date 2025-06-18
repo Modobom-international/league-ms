@@ -55,20 +55,23 @@
 </style>
 @section('content')
     <div class="container mx-auto px-4 mt-4">
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 p-4 bg-white rounded-lg ">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 p-4 bg-white rounded-lg max-w-full overflow-x-auto">
             @foreach ($categories as $category)
                 <a href="{{ route('exchange.categoryDetail', $category->slug) }}"
-                    class="group  flex flex-col items-center text-center space-y-2 rounded-lg p-3 transition duration-300 hover:opacity-80 rounded-lg">
-                    <div
-                        class="w-24 h-24 shadow-md  flex items-center justify-center overflow-hidden transition duration-300">
-                        <img src="{{ asset($category->image) }}" alt="{{ $category->name }}" class="w-20 h-20 object-contain">
+                   class="group flex flex-col items-center text-center space-y-2 rounded-lg p-3 transition duration-300 hover:opacity-80 w-full max-w-[120px] mx-auto">
+
+                    <div class="w-20 h-20 shadow-md flex items-center justify-center overflow-hidden">
+                        <img src="{{ asset($category->image) }}" alt="{{ $category->name }}"
+                             class="w-full h-full object-contain" />
                     </div>
-                    <span class="text-sm font-medium text-gray-800 transition duration-300 group-hover:text-green-600">
-                        {{ $category->name }}
-                    </span>
+
+                    <span class="text-xs sm:text-sm font-medium text-gray-800 transition group-hover:text-green-600 break-words">
+                {{ $category->name }}
+            </span>
                 </a>
             @endforeach
         </div>
+
 
         <div class="relative w-full overflow-hidden rounded-xl mt-4" id="custom-slider">
             <!-- Slides wrapper -->
@@ -111,7 +114,7 @@
                                                 <h3 class="product-title text-xl font-semibold line-clamp-2">
                                                     {{ $product->name }}</h3>
                                             </a>
-                                            <div class="flex justify-between items-center text-red-600 font-semibold mt-4">
+                                            <div class="flex justify-between items-center text-red-600 font-semibold mt-2">
                                                 <p class="text-xl">{{ number_format($product->price, 0, ',', '.') }} đ</p>
                                             </div>
                                         </div>
@@ -153,55 +156,57 @@
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-md mt-4 mx-auto ">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Badminton Exchange -
-                {{ __('Sàn Giao Dịch Cầu Lông Secondhand Uy Tín') }}</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                {{ __('Badminton Exchange') }} – {{ __('Trusted Secondhand Badminton Marketplace') }}
+            </h2>
 
             <div id="short-text" class="text-gray-700 space-y-3 line-clamp-7">
                 <p>
-                    <span class="font-semibold">Badminton Exchange</span> {{ __('là nền tảng') }} <span
-                        class="text-blue-600">{{ __('mua bán, trao đổi dụng cụ cầu lông secondhand') }}
-                    </span> {{ __('hàng đầu Việt Nam, nơi kết nối cộng đồng yêu thích bộ môn cầu lông.') }}
+                    <span class="font-semibold">{{ __('Badminton Exchange') }}</span>
+                    {{ __('is a leading platform for') }}
+                    <span class="text-blue-600">{{ __('buying, selling, and exchanging secondhand badminton equipment') }}</span>
+                    {{ __('in Vietnam, connecting a passionate badminton community.') }}
                 </p>
                 <p>
-                    {{ __('Chúng tôi cung cấp giải pháp') }} <span class="font-medium">
-                        {{ __('tiết kiệm đến 70%') }}</span>
-                    {{ __('khi mua các sản phẩm chất lượng từ các thương hiệu') }} <span class="text-yellow-600">Yonex,
-                        Victor, Li-Ning</span>
-                    {{ __('với đầy đủ phụ kiện từ vợt, giày đến túi đựng.') }}
+                    {{ __('We offer solutions that help you save up to') }}
+                    <span class="font-medium">{{ __('70%') }}</span>
+                    {{ __('on high-quality products from trusted brands like') }}
+                    <span class="text-yellow-600">Yonex, Victor, Li-Ning</span>
+                    {{ __('with full accessories from rackets, shoes to bags.') }}
                 </p>
                 <p>
-                    <span
-                        class="font-medium">{{ __('Đa dạng sản phẩm') }}:</span>{{ __('Vợt (Astrox, Nanoflare), giày (Power Cushion), túi đựng và phụ kiện chính hãng.') }}
+                    <span class="font-medium">{{ __('Product variety') }}:</span>
+                    {{ __('Rackets (Astrox, Nanoflare), shoes (Power Cushion), bags and genuine accessories.') }}
                 </p>
                 <p>
-                    <span class="font-medium">{{ __('Giao dịch an toàn') }}:</span>
-                    {{ __('Xác minh người bán, hệ thống đánh giá uy tín, hỗ trợ gặp mặt tại sân cầu.') }}
+                    <span class="font-medium">{{ __('Secure transactions') }}:</span>
+                    {{ __('Verified sellers, reputation rating system, and support for meeting at badminton courts.') }}
                 </p>
                 <p>
-                    <span class="font-medium">{{ __('Dễ dàng tìm kiếm') }}:</span>
-                    {{ __('Bộ lọc thông minh theo hãng, giá, tình trạng sản phẩm.') }}
+                    <span class="font-medium">{{ __('Easy search') }}:</span>
+                    {{ __('Smart filters by brand, price, and product condition.') }}
                 </p>
             </div>
 
             <div class="mt-4 flex flex-col sm:flex-row sm:items-center gap-4">
-                <a href="{{route('exchange.aboutUs')}}"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
+                <a href="{{ route('exchange.aboutUs') }}"
+                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
                     {{ __('See more') }}
                 </a>
                 <div class="flex items-center">
                     <div class="flex -space-x-2">
                         <img class="w-8 h-8 rounded-full border-2 border-white"
-                            src="https://randomuser.me/api/portraits/women/12.jpg" alt="">
+                             src="https://randomuser.me/api/portraits/women/12.jpg" alt="">
                         <img class="w-8 h-8 rounded-full border-2 border-white"
-                            src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                             src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
                         <img class="w-8 h-8 rounded-full border-2 border-white"
-                            src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+                             src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
                     </div>
-                    <span class="ml-3 text-sm text-gray-500">Đã có <span class="font-bold">1000+</span>
-                        {{ __('members') }}</span>
+                    <span class="ml-3 text-sm text-gray-500">{{ __('Over') }} <span class="font-bold">1000+</span> {{ __('members') }}</span>
                 </div>
             </div>
         </div>
+
         <div class="bg-white p-6 rounded-xl shadow-md mt-4 mx-auto ">
             <div class="container my-5 ">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ __('Some satisfied customer reviews ') }}</h2>
@@ -331,3 +336,45 @@
         renderPage(currentPage); // Hiển thị trang đầu
     });
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sliderTrack = document.getElementById('slider-track');
+        const slides = sliderTrack.children;
+        const totalSlides = slides.length;
+        const paginationDots = document.querySelectorAll('[data-index]');
+
+        let currentIndex = 0;
+        const slideInterval = 4000; // 4s
+
+        function goToSlide(index) {
+            const slideWidth = slides[0].clientWidth;
+            sliderTrack.style.transform = `translateX(-${slideWidth * index}px)`;
+
+            // Update dots
+            paginationDots.forEach(dot => dot.classList.remove('bg-white', 'bg-orange-500'));
+            paginationDots[index].classList.add('bg-orange-500');
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % totalSlides;
+            goToSlide(currentIndex);
+        }
+
+        // Auto slide
+        let interval = setInterval(nextSlide, slideInterval);
+
+        // Optional: Click to navigate
+        paginationDots.forEach(dot => {
+            dot.addEventListener('click', function () {
+                clearInterval(interval); // Stop auto slide on manual click
+                currentIndex = parseInt(dot.getAttribute('data-index'));
+                goToSlide(currentIndex);
+            });
+        });
+
+        // Initial state
+        goToSlide(currentIndex);
+    });
+</script>
+

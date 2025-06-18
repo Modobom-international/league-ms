@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Toastr CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 
     <!-- jQuery (bắt buộc) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -17,7 +17,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <style>
         .toast-top-right {
-            top: 60px !important; /* bạn chỉnh số px tùy ý */
+            top: 60px !important;
+            /* bạn chỉnh số px tùy ý */
         }
 
         @media (max-width: 767px) {
@@ -29,7 +30,8 @@
         /* Hiện button trên desktop (từ 768px trở lên) */
         @media (min-width: 768px) {
             .ma-news {
-                display: inline-block; /* hoặc block, tùy bạn */
+                display: inline-block;
+                /* hoặc block, tùy bạn */
             }
         }
     </style>
@@ -90,7 +92,8 @@
                         0
                     </span>
                 </button>
-                <a href="{{route('chat.listChat')}}" id="notification-btn" class="relative bg-gray-200 p-2 rounded-full">
+                <a href="{{ route('chat.listChat') }}" id="notification-btn"
+                    class="relative bg-gray-200 p-2 rounded-full">
                     💬
                 </a>
                 <a href="{{ route('exchange.managerPosts') }}" class="relative bg-gray-200 p-2 rounded-full">
@@ -109,56 +112,79 @@
                             </svg>
                         </button>
                         <div id="user-dropdown"
-                             class="hidden absolute mt-2 w-80 bg-white rounded-xl shadow-xl z-50 p-4 space-y-4
-            right-0 sm:right-0
-            left-1/2 sm:left-auto
-            transform -translate-x-1/2 sm:translate-x-0">
+                             class="hidden absolute mt-2 w-80 bg-white rounded-xl shadow-xl z-50 p-4 space-y-4right-0 sm:right-0
+left-1/2 sm:left-auto
+    transform -translate-x-1/2 sm:translate-x-0">
+
                             <div class="flex items-center space-x-3 border-b pb-3">
                                 <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
-                                    class="w-12 h-12 rounded-full border">
+                                     class="w-12 h-12 rounded-full border">
                                 <div>
                                     <p class="font-semibold text-gray-800">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-gray-500">⭐ 0.0 | 0 người theo dõi</p>
-                                    <p class="text-xs text-gray-400">TK: C0882xxxxx</p>
+                                    <p class="text-xs text-gray-500">⭐ 0.0 | {{ __('followers', ['count' => 0]) }}</p>
+                                    <p class="text-xs text-gray-400">{{ __('Account') }}: C0882xxxxx</p>
                                 </div>
                             </div>
+
                             <div>
-                                <h4 class="text-base font-bold text-gray-600 mb-1">Quản lý đơn hàng</h4>
-                                <div class="grid grid-cols-2 gap-2">
+                                <h4 class="text-base font-bold text-gray-600 mb-1">{{ __('Order Management') }}</h4>
+                                <div class="grid-cols-2 gap-2">
+                                    <a href="{{ route('exchange.managerPosts') }}"
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">📋 {{ __('Management Posts') }}</a>
+                                    <a href="{{route('transactionHistory')}}"
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">📈 {{ __('Transaction History') }}</a>
                                     <a href="#"
-                                        class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">🛒 Đơn
-                                        mua</a>
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">🛒 {{ __('Buying Orders') }}</a>
                                     <a href="#"
-                                        class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">📦 Đơn
-                                        bán</a>
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">📦 {{ __('Selling Orders') }}</a>
                                 </div>
                             </div>
+
                             <div>
-                                <h4 class="text-base font-bold text-gray-600 mb-1">Dịch vụ khác</h4>
-                                <div class="grid grid-cols-2 gap-2">
+                                <h4 class="text-base font-bold text-gray-600 mb-1">{{ __('Other Services') }}</h4>
+                                <div class=" grid-cols-2 gap-2">
+                                    <a href="#"
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        <i class="fas fa-star mr-2 text-yellow-500"></i> {{ __('Favorite post') }}
+                                    </a>
+
+                                    <a href="#"
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        <i class="fas fa-search mr-2 text-gray-600"></i> {{ __('Save Search') }}
+                                    </a>
+
                                     <a href="{{ route('exchange.profile') }}"
-                                        class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">🢁‍ Thông tin
-                                        cá nhân</a>
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        <i class="fas fa-user mr-2 text-gray-600"></i> {{ __('Profile Info') }}
+                                    </a>
+
+                                    <a href="{{ route('exchange.changePassword') }}"
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        <i class="fas fa-lock mr-2 text-gray-600"></i> {{ __('Change Password') }}
+                                    </a>
+
                                     <a href="#"
-                                        class="hover:bg-gray-100 px-2 py-1 text-black rounded block text-base">❤ Trợ
-                                        giúp</a>
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">❤ {{ __('Help Center') }}</a>
                                 </div>
                             </div>
+
                             <div class="text-center pt-2 border-t">
                                 <a href="{{ route('exchangeLogout') }}">
-                                    <button class="text-red-500 hover:underline text-base">Đăng xuất</button>
+                                    <button class="text-red-500 hover:underline text-base">{{ __('Logout') }}</button>
                                 </a>
                             </div>
                         </div>
+
                     </div>
                     <a href="{{ route('exchange.postProduct') }}"
-                       class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold inline-block whitespace-nowrap">
-                        + {{ __('POST NEW') }}
+                        class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold inline-block whitespace-nowrap">
+                        + {{ __('POST') }}
                     </a>
                 @else
                     <a href="{{ route('exchange.LoginForm') }}" class="button white">{{ __('Log In') }}</a>
-                    <a href="{{route('exchange.showRegisterForm')}}" class="button btn-register">{{ __('Register') }}</a>
-                @endif
+                    <a href="{{ route('exchange.showRegisterForm') }}"
+                        class="button btn-register">{{ __('Register') }}</a>
+                    @endif
                 </div>
             </div>
         </header>
@@ -272,27 +298,31 @@
 
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const categoryBtn = document.getElementById("category-btn");
-            const categoryMenu = document.getElementById("category-menu");
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("category-btn");
+        const menu = document.getElementById("category-menu");
 
-            // Toggle menu khi click vào nút danh mục
-            categoryBtn.addEventListener("click", function(event) {
-                event.stopPropagation(); // Ngăn không cho sự kiện lan ra ngoài
-                categoryMenu.classList.toggle("hidden");
+        if (toggleBtn && menu) {
+            toggleBtn.addEventListener("click", function (e) {
+                e.stopPropagation(); // ngăn chặn click bị lan ra ngoài
+                menu.classList.toggle("hidden");
             });
 
-            // Ẩn menu khi click ra ngoài
-            document.addEventListener("click", function(event) {
-                if (!categoryBtn.contains(event.target) && !categoryMenu.contains(event.target)) {
-                    categoryMenu.classList.add("hidden");
+            // Ẩn menu khi click bên ngoài
+            document.addEventListener("click", function (e) {
+                if (!menu.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    menu.classList.add("hidden");
                 }
             });
-        });
-    </script>
+        } else {
+            console.warn("Không tìm thấy #category-btn hoặc #category-menu");
+        }
+    });
+</script>
 
-    <script>
+
+<script>
         setTimeout(() => {
             let alertBox = document.getElementById('alert-success');
             if (alertBox) {
