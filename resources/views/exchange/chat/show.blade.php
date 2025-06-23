@@ -65,41 +65,39 @@
     </style>
     <div class="container mx-auto max-w-screen-lg flex h-screen bg-white mt-4">
         <!-- Sidebar -->
-        <div class="sidebar  w-1/3 border-r overflow-y-auto">
-            <div class="p-4">
-                <input type="text" placeholder="Tìm hội thoại..." class="w-full px-3 py-2 border rounded">
+        <div class="sidebar w-1/3 border-r border-gray-300 overflow-y-auto">
+            <div class="px-4 pb-2 mt-4">
+                <input type="text" id="searchChat" placeholder="🔍 Tìm kiếm..."
+                       class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300">
             </div>
             <ul>
-                @foreach ($conversations as $conv)
+                @foreach($conversations as $conv)
                     @php
                         $authUser = auth()->user();
                         $otherUser = $conv->buyer_id === $authUser->id ? $conv->seller : $conv->buyer;
+                        $images = json_decode($conv->product->images, true) ?? [];
+                        $mainImage = $images[0] ?? '/images/no-image.png';
                     @endphp
-                    <li class="p-3 hover:bg-black-100 cursor-pointer border-t">
+
+                    <li class="hover:bg-gray-100 cursor-pointer border-t chat-item"
+                        data-name="{{ strtolower($otherUser->name) }}"
+                        data-product="{{ strtolower($conv->product->name) }}">
                         <a href="{{ route('chat.show', $conv->id) }}">
-                            <div class="flex items-center justify-between ">
-                                <div class="flex ">
-                                    <div>
-                                        <img class="image w-[3rem] rounded-lg"
-                                             src="{{ asset($otherUser->profile_photo_path ?? '/images/default-avatar.png') }}"
-                                             alt="avatar">
-                                    </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex p-3">
+                                    <img class="w-[3rem] h-[3rem] rounded-lg object-cover"
+                                         src="{{ asset($otherUser->profile_photo_path ?? '/images/default-avatar.png') }}"
+                                         alt="avatar">
                                     <div class="ml-4">
-                                        <div class="font-semibold text-black-600">{{ $otherUser->name }}</div>
-                                        <div class="font-sm text-black-600">{{ Str::limit($conv->product->name, 20) }}</div>
-                                        <div class="text-sm text-gray-600">
-                                            {{ Str::limit(optional($conv->messages->last())->content, 20) }}
+                                        <div class="font-semibold text-black">{{ $otherUser->name }}</div>
+                                        <div class="text-sm text-gray-700">{{ Str::limit($conv->product->name, 20) }}</div>
+                                        <div class="text-sm text-gray-500">
+                                            {{ Str::limit(optional($conv->messages->last())->content, 30) }}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    @php
-                                        $images = json_decode($conv->product->images, true) ?? [];
-                                        $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
-                                    @endphp
-                                    <img class="image w-[3rem] rounded-lg" src="{{ asset($mainImage) }}"
-                                         alt="avatar">
-                                </div>
+                                <img class="w-20 h-20 rounded-lg mr-4 object-cover p-2"
+                                     src="{{ asset($mainImage) }}" alt="product image">
                             </div>
                         </a>
                     </li>
@@ -366,4 +364,25 @@
         document.getElementById('markAsSoldModal').classList.add('hidden');
         document.getElementById('markAsSoldForm').reset();
     }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchChat');
+        const chatItems = document.querySelectorAll('.chat-item');
+
+        searchInput.addEventListener('input', function () {
+            const keyword = this.value.toLowerCase().trim();
+
+            chatItems.forEach(item => {
+                const name = item.dataset.name || '';
+                const product = item.dataset.product || '';
+                if (name.includes(keyword) || product.includes(keyword)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
 </script>
