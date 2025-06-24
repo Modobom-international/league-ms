@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Repositories\CategoryProductRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\Auth;
 
 
 class OrderController extends Controller
@@ -28,27 +29,27 @@ class OrderController extends Controller
 
     public function transactionHistory()
     {
-        $userId = auth()->id();
+        $userId = Auth::guard('canstum')->user()->id;
         $history = $this->orderRepository->transactionHistory($userId);
         return view('exchange.order.transaction-history', compact('history'));
     }
 
     public function orderBuy()
     {
-        $userId = auth()->id();
+        $userId = Auth::guard('canstum')->user()->id;
 
         $purchases = $this->orderRepository->orderBuy($userId);
 
-        return view('transactions.order.buy', compact('purchases'));
+        return view('exchange.order.buy', compact('purchases'));
     }
 
     public function orderSell()
     {
-        $userId = auth()->id();
+        $userId = Auth::guard('canstum')->user()->id;
 
         $sales = $this->orderRepository->orderSell($userId);
 
-        return view('transactions.order.sell', compact('sales'));
+        return view('exchange.order.sell', compact('sales'));
     }
 
 }

@@ -100,27 +100,29 @@
                     <button class="ma-news text-black"> {{ 'Manager posts' }}</button>
                 </a>
 
-                @auth
+                @if(Auth::guard('canstum')->check())
+                    @php $user = Auth::guard('canstum')->user(); @endphp
+
                     <div class="relative inline-block text-left" id="user-dropdown-wrapper">
                         <button id="user-toggle-btn" class="flex items-center space-x-2 hover:text-yellow-500">
-                            <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
-                                class="w-8 h-8 rounded-full border" alt="User Avatar">
-                            <span class="font-semibold text-white-800">{{ Auth::user()->name }}</span>
+                            <img src="{{ asset($user->profile_photo_path ?? '/images/no-image.png') }}"
+                                 class="w-8 h-8 rounded-full border" alt="User Avatar">
+                            <span class="font-semibold text-white-800">{{ $user->name }}</span>
                             <svg class="w-4 h-4 text-white-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
+
                         <div id="user-dropdown"
-                             class="hidden absolute mt-2 w-80 bg-white rounded-xl shadow-xl z-50 p-4 space-y-4right-0 sm:right-0
-left-1/2 sm:left-auto
-    transform -translate-x-1/2 sm:translate-x-0">
+                             class="hidden absolute mt-2 w-80 bg-white rounded-xl shadow-xl z-50 p-4 space-y-4 right-0 sm:right-0
+                    left-1/2 sm:left-auto transform -translate-x-1/2 sm:translate-x-0">
 
                             <div class="flex items-center space-x-3 border-b pb-3">
-                                <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
+                                <img src="{{ asset($user->profile_photo_path ?? '/images/no-image.png') }}"
                                      class="w-12 h-12 rounded-full border">
                                 <div>
-                                    <a href="{{ route('exchange.profilePost', Hashids::encode(Auth::user()->id)) }}">
-                                        <p class="font-semibold text-gray-800">{{ Auth::user()->name }}</p>
+                                    <a href="{{ route('exchange.profilePost', Hashids::encode($user->id)) }}">
+                                        <p class="font-semibold text-gray-800">{{ $user->name }}</p>
                                     </a>
                                     <p class="text-xs text-gray-500">⭐ 0.0 | {{ __('followers', ['count' => 0]) }}</p>
                                     <p class="text-xs text-gray-400">{{ __('Account') }}: C0882xxxxx</p>
@@ -131,62 +133,70 @@ left-1/2 sm:left-auto
                                 <h4 class="text-base font-bold text-gray-600 mb-1">{{ __('Order Management') }}</h4>
                                 <div class="grid-cols-2 gap-2">
                                     <a href="{{ route('exchange.managerPosts') }}"
-                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">📋 {{ __('Management Posts') }}</a>
-                                    <a href="{{route('transactionHistory')}}"
-                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">📈 {{ __('Transaction History') }}</a>
-                                    <a href="#"
-                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">🛒 {{ __('Buying Orders') }}</a>
-                                    <a href="#"
-                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">📦 {{ __('Selling Orders') }}</a>
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        📋 {{ __('Management Posts') }}
+                                    </a>
+                                    <a href="{{ route('transactionHistory') }}"
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        📈 {{ __('Transaction History') }}
+                                    </a>
+                                    <a href="{{route('orderBuy')}}"
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        🛒 {{ __('Buying Orders') }}
+                                    </a>
+                                    <a href="{{route('orderSell')}}"
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        📦 {{ __('Selling Orders') }}
+                                    </a>
                                 </div>
                             </div>
 
                             <div>
                                 <h4 class="text-base font-bold text-gray-600 mb-1">{{ __('Other Services') }}</h4>
-                                <div class=" grid-cols-2 gap-2">
+                                <div class="grid-cols-2 gap-2">
                                     <a href="#"
                                        class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
                                         <i class="fas fa-star mr-2 text-yellow-500"></i> {{ __('Favorite post') }}
                                     </a>
-
                                     <a href="#"
                                        class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
                                         <i class="fas fa-search mr-2 text-gray-600"></i> {{ __('Save Search') }}
                                     </a>
-
                                     <a href="{{ route('exchange.profile') }}"
                                        class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
                                         <i class="fas fa-user mr-2 text-gray-600"></i> {{ __('Profile Info') }}
                                     </a>
-
                                     <a href="{{ route('exchange.changePassword') }}"
                                        class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
                                         <i class="fas fa-lock mr-2 text-gray-600"></i> {{ __('Change Password') }}
                                     </a>
-
                                     <a href="#"
-                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">❤ {{ __('Help Center') }}</a>
+                                       class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
+                                        ❤ {{ __('Help Center') }}
+                                    </a>
                                 </div>
                             </div>
 
                             <div class="text-center pt-2 border-t">
-                                <a href="{{ route('exchangeLogout') }}">
+                                <form action="{{ route('exchangeLogout') }}" method="POST">
+                                    @csrf
                                     <button class="text-red-500 hover:underline text-base">{{ __('Logout') }}</button>
-                                </a>
+                                </form>
                             </div>
                         </div>
-
                     </div>
+
                     <a href="{{ route('exchange.postProduct') }}"
-                        class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold inline-block whitespace-nowrap">
+                       class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold inline-block whitespace-nowrap">
                         + {{ __('POST') }}
                     </a>
                 @else
                     <a href="{{ route('exchange.LoginForm') }}" class="button white">{{ __('Log In') }}</a>
-                    <a href="{{ route('exchange.showRegisterForm') }}"
-                        class="button btn-register">{{ __('Register') }}</a>
-                    @endif
-                </div>
+                    <a href="{{ route('exchange.showRegisterForm') }}" class="button btn-register">{{ __('Register') }}</a>
+                @endif
+
+
+            </div>
             </div>
         </header>
         <div class="">

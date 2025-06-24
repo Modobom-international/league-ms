@@ -73,7 +73,7 @@
             <ul>
                 @foreach($conversations as $conv)
                     @php
-                        $authUser = auth()->user();
+                        $authUser = Auth::guard('canstum')->user();
                         $otherUser = $conv->buyer_id === $authUser->id ? $conv->seller : $conv->buyer;
                         $images = json_decode($conv->product->images, true) ?? [];
                         $mainImage = $images[0] ?? '/images/no-image.png';
@@ -109,7 +109,7 @@
         <div class="chat-detail w-2/3 flex flex-col">
         @if ($conversation)
             @php
-                $authUser = auth()->user();
+                $authUser = Auth::guard('canstum')->user();
                 $product = $conversation->product;
                 $partner = $conversation->buyer_id === $authUser->id ? $conversation->seller: $conversation->buyer;
             @endphp

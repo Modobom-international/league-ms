@@ -114,6 +114,7 @@
                                                 <h3 class="product-title text-xl font-semibold line-clamp-2">
                                                     {{ $product->name }}</h3>
                                             </a>
+
                                             <div class="flex justify-between items-center text-red-600 font-semibold mt-2">
                                                 <p class="text-xl">{{ number_format($product->price, 0, ',', '.') }} đ</p>
                                             </div>

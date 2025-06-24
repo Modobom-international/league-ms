@@ -122,33 +122,24 @@ class  AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
         $remember = $request->filled('remember');
-
-        // ✅ Dùng guard 'canstum'
         if (Auth::guard('canstum')->attempt($credentials, $remember)) {
-            $request->session()->put('email', $credentials['email']);
+            $request->session()->regenerate(); // Đảm bảo session hoạt động ổn định
 
-            $user = Auth::guard('canstum')->user();
-
-            if ($request->has('return_url')) {
+            if ($request->filled('return_url')) {
                 return redirect($request->get('return_url'));
             }
+
+            $user = Auth::guard('canstum')->user();
 
             return redirect()->route('exchange.home')->with("success", __("Login successfully!"));
         }
 
-        // ❌ Sai thông tin đăng nhập
         return back()->withErrors([
             'custom' => __('Email or Password is wrong!')
         ])->withInput($request->only('email', 'remember'));
     }
 
-    public function exchangeLogout()
-    {
-        Session::flush();
 
-        Auth::guard('web')->logout();
-        return redirect()->route('exchange.LoginForm');
-    }
 
     public function showRegisterForm()
     {

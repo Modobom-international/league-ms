@@ -83,15 +83,15 @@ Route::get('/category/{slug}', [HomePageController::class, 'categoryDetail'])->n
 Route::get('/search', [HomePageController::class, 'search'])->name('products.search');
 Route::get('/filter-by', [HomePageController::class, 'filter'])->name('products.searchInProduct');
 Route::get('/products/load-more', [HomePageController::class, 'loadMore'])->name('exchange.loadMore');
-Route::middleware(['auth.exchange'])->group(function () {
 
+Route::middleware(['auth.exchange'])->group(function () {
     // Profile
     Route::get('/user/{encodedId}/profile', [ExchangeUserController::class, 'profilePost'])->name('exchange.profilePost');
     Route::get('/user/profile', [ExchangeUserController::class, 'profile'])->name('exchange.profile');
     Route::post('/profile/{id}/', [ExchangeUserController::class, 'update'])->name('exchange.update');
     Route::get('/me/change-password', [ExchangeUserController::class, 'changePassword'])->name('exchange.changePassword');
     Route::post('/profile/update-password', [ExchangeUserController::class, 'updatePassword'])->name('exchange.updatePassword');
-    Route::get('/exchange-logout', [ExchangeUserController::class, 'exchangeLogout'])->name('exchangeLogout');
+    Route::post('/exchange-logout', [ExchangeUserController::class, 'exchangeLogout'])->name('exchangeLogout');
 
     // Post
     Route::get('/manager-posts', [ExchangeProductController::class, 'managerPosts'])->name('exchange.managerPosts');

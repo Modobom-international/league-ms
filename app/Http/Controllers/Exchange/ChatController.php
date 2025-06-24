@@ -38,7 +38,7 @@ class ChatController extends Controller
 
     public function listChat()
     {
-        $user = Auth::user();
+        $user =Auth::guard('canstum')->user();
 
         $conversations = $this->conversationRepository->listChat($user);
         return view('exchange.chat.list-chat', compact('conversations'));
@@ -47,7 +47,7 @@ class ChatController extends Controller
     public function chatWithSeller($productId)
     {
         $product = $this->productRepository->show($productId);
-        $user = Auth::user();
+        $user =Auth::guard('canstum')->user();
 
         // Tìm conversation đã tồn tại (có thể là buyer hoặc seller)
         $conversation = $this->conversationRepository->getConversation($product, $user);
@@ -94,7 +94,7 @@ class ChatController extends Controller
 
     public function show(Conversation $conversation)
     {
-        $user = Auth::user();
+        $user =Auth::guard('canstum')->user();
 
         // Kiểm tra nếu user không liên quan thì chặn
         if ($conversation->buyer_id !== $user->id && $conversation->seller_id !== $user->id) {
@@ -134,7 +134,7 @@ class ChatController extends Controller
 
     public function send(Request $request, $conversationId)
     {
-        $user = Auth::user();
+        $user =Auth::guard('canstum')->user();
 
         $conversation = $this->conversationRepository->show($conversationId);
         $request->validate([

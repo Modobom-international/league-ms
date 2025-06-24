@@ -26,7 +26,7 @@ class UserController extends Controller
 
     public function profile()
     {
-        $idUser = Auth::user()->id;
+        $idUser = Auth::guard('canstum')->user()->id;
         $dataUser = $this->userRepository->showInfo($idUser);
         return view('exchange.profile.update-info', compact('dataUser'));
     }
@@ -44,7 +44,7 @@ class UserController extends Controller
 
     public function changePassword()
     {
-        $idUser = Auth::user()->id;
+        $idUser = Auth::guard('canstum')->user()->id;
         $dataUser = $this->userRepository->showInfo($idUser);
         return view('exchange.profile.change-password', compact('dataUser'));
     }
@@ -65,6 +65,16 @@ class UserController extends Controller
         ]);
 
         return back()->with("success", __("Password successfully changed!"));
+    }
+
+    public function exchangeLogout(Request $request)
+    {
+        Auth::guard('canstum')->logout(); // logout đúng guard
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('exchange.LoginForm'); // về trang login exchange
     }
 
     public function profilePost($encodedId)

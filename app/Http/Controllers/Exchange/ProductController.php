@@ -116,7 +116,7 @@ class ProductController extends Controller
 
     public function managerPosts(Request $request)
     {
-        $user = Auth::user();
+        $user =  Auth::guard('canstum')->user();
         $categories = $this->categoryProductRepository->index();
         $getNewsByStatus = $request->get('status');
         $keyword = $request->input('q');
