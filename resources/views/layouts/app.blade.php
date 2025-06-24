@@ -56,15 +56,14 @@
                         </svg>
                         {{ 'CATEGORY' }}
                     </button>
-                    <div id="category-menu" class="absolute left-0 mt-2 w-64 bg-white shadow-lg rounded-lg z-50 hidden">
+                    <div id="category-menu"
+                         class="absolute left-[-114px] lg:left-0 mt-2 w-64 bg-white shadow-lg rounded-lg z-50 hidden">
                         @foreach ($categories as $category)
                             <a href="{{ route('exchange.categoryDetail', $category['slug']) }}"
-                                class="block px-4 py-3 text-gray-700 hover:bg-gray-300 flex items-center">
+                               class="block px-4 py-3 text-gray-700 hover:bg-gray-300 flex items-center">
                                 <img src="{{ asset($category->image) }}" id="mainImage"
-                                    class="w-10 h-10 rounded-lg shadow-md mr-4">
-                                <span>
-                                    {{ $category->name }}
-                                </span>
+                                     class="w-10 h-10 rounded-lg shadow-md mr-4">
+                                <span>{{ $category->name }}</span>
                             </a>
                         @endforeach
                     </div>
@@ -120,7 +119,9 @@ left-1/2 sm:left-auto
                                 <img src="{{ asset(Auth::user()->profile_photo_path ?? '/images/no-image.png') }}"
                                      class="w-12 h-12 rounded-full border">
                                 <div>
-                                    <p class="font-semibold text-gray-800">{{ Auth::user()->name }}</p>
+                                    <a href="{{ route('exchange.profilePost', Hashids::encode(Auth::user()->id)) }}">
+                                        <p class="font-semibold text-gray-800">{{ Auth::user()->name }}</p>
+                                    </a>
                                     <p class="text-xs text-gray-500">⭐ 0.0 | {{ __('followers', ['count' => 0]) }}</p>
                                     <p class="text-xs text-gray-400">{{ __('Account') }}: C0882xxxxx</p>
                                 </div>

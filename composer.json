@@ -25,6 +25,7 @@
         "socialiteproviders/line": "^4.1",
         "stichoza/google-translate-php": "^5.1",
         "tanmuhittin/laravel-google-translate": "^2.3",
+        "vinkla/hashids": "^11.0",
         "yajra/laravel-datatables-oracle": "^10.11"
     },
     "require-dev": {

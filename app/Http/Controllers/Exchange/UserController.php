@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Exchange;
 
+use App\Enums\Product;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
+use Vinkla\Hashids\Facades\Hashids;
 
 
 class UserController extends Controller
@@ -66,6 +67,17 @@ class UserController extends Controller
         return back()->with("success", __("Password successfully changed!"));
     }
 
+    public function profilePost($encodedId)
+    {
+        $id = Hashids::decode($encodedId)[0] ?? null;
+        if (!$id) abort(404);
 
+        $user = $this->userRepository->showInfo($id);
+
+        $activeProducts = $user->products()->where('status', Product::STATUS_POST_ACCEPT)->get();
+        $soldProducts = $user->products()->where('status', Product::STATUS_POST_HIDDEN)->get();
+
+        return view('exchange.profile.info', compact('user', 'activeProducts', 'soldProducts'));
+    }
 
 }

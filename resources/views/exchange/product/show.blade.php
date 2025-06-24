@@ -206,8 +206,12 @@
                 <div class="border rounded-lg p-4 flex justify-between items-center mt-4 max-w-xl w-full">
                     <div class="flex items-center space-x-3">
                         <div
-                            class="w-12 h-12 bg-green-800 text-white rounded-full flex items-center justify-center text-lg font-semibold">
-                            {{ strtoupper(substr($product->users->name, 0, 1)) }}
+                            class="w-12 h-12  text-white rounded-full flex items-center justify-center text-lg font-semibold">
+                            <a href="{{ route('exchange.profilePost', Hashids::encode($product->users->id)) }}">
+                                <img src="{{ asset($product->users->profile_photo_path ?? '/images/no-image.png') }}"
+                                     class="w-12 h-12 rounded-full border">
+
+                            </a>
                         </div>
                         <div>
                             <div class="font-semibold text-gray-900">{{ $product->users->name }}</div>

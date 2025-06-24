@@ -78,14 +78,15 @@ Route::get('exchange', [HomePageController::class, 'index'])->name('exchange.hom
 Route::get('exchange/about-us', [HomePageController::class, 'aboutUs'])->name('exchange.aboutUs');
 Route::get('exchange/privacy-policy', [HomePageController::class, 'privacyPolicy'])->name('exchange.privacyPolicy');
 Route::get('exchange/rule', [HomePageController::class, 'rule'])->name('exchange.rule');
-Route::get('/pro/{slug}', [HomePageController::class, 'productDetail'])->name('exchange.productDetail');
-Route::get('/{slug}', [HomePageController::class, 'categoryDetail'])->name('exchange.categoryDetail');
+Route::get('/post/{slug}', [HomePageController::class, 'productDetail'])->name('exchange.productDetail');
+Route::get('/category/{slug}', [HomePageController::class, 'categoryDetail'])->name('exchange.categoryDetail');
 Route::get('/search', [HomePageController::class, 'search'])->name('products.search');
 Route::get('/filter-by', [HomePageController::class, 'filter'])->name('products.searchInProduct');
 Route::get('/products/load-more', [HomePageController::class, 'loadMore'])->name('exchange.loadMore');
 Route::middleware(['auth.exchange'])->group(function () {
 
     // Profile
+    Route::get('/user/{encodedId}/profile', [ExchangeUserController::class, 'profilePost'])->name('exchange.profilePost');
     Route::get('/user/profile', [ExchangeUserController::class, 'profile'])->name('exchange.profile');
     Route::post('/profile/{id}/', [ExchangeUserController::class, 'update'])->name('exchange.update');
     Route::get('/me/change-password', [ExchangeUserController::class, 'changePassword'])->name('exchange.changePassword');
