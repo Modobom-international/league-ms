@@ -103,7 +103,7 @@
                     {{ __('Updated') }} {{ $product->updated_at->diffForHumans() }}
                 </div>
 
-                @php $isLoggedIn = Auth::check(); @endphp
+                @php $isLoggedIn = Auth::guard('canstum')->check(); @endphp
 
                 <div class="mt-4 flex space-x-2">
                     @if($isLoggedIn && auth()->id() !== $product->user_id || !$isLoggedIn)

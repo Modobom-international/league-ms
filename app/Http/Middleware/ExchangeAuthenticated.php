@@ -8,11 +8,16 @@ use Illuminate\Support\Facades\Auth;
 
 class ExchangeAuthenticated
 {
-    // app/Http/Middleware/AuthExchange.php
     public function handle($request, Closure $next)
     {
         if (!Auth::guard('canstum')->check()) {
-            return redirect()->route('exchange.LoginForm'); // route trang login riêng của exchange
+            if ($request->expectsJson()) {
+                // Nếu là request AJAX / fetch
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+
+            // Nếu là truy cập bằng trình duyệt thì redirect về trang login
+            return redirect()->route('exchange.LoginForm');
         }
 
         return $next($request);

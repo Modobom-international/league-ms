@@ -91,9 +91,7 @@ class HomePageController extends Controller
 
     public function categoryDetail($slug, Request $request)
     {
-        $categories = $this->categoryProductRepository->index();
         $category = $this->categoryProductRepository->productCategory($slug);
-
         // Tập hợp filter từ request
         $filters = [
             'location' => $request->input('location'),
@@ -105,7 +103,7 @@ class HomePageController extends Controller
         $products = $this->productRepository->productFilter($category, $filters);
 
 
-        return view('exchange.product.category-product', compact('products', 'categories', 'category'));
+        return view('exchange.product.category-product', compact('products', 'category'));
     }
 
     public function search(Request $request)

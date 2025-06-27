@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Chợ Cầu Lông')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -154,7 +155,7 @@
                             <div>
                                 <h4 class="text-base font-bold text-gray-600 mb-1">{{ __('Other Services') }}</h4>
                                 <div class="grid-cols-2 gap-2">
-                                    <a href="#"
+                                    <a href="{{ route('exchange.favorites') }}"
                                        class="hover:bg-gray-100 px-2 py-2 text-black rounded block text-base">
                                         <i class="fas fa-star mr-2 text-yellow-500"></i> {{ __('Favorite post') }}
                                     </a>

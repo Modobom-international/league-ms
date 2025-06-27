@@ -41,15 +41,10 @@ class CategoryProductRepository extends BaseRepository
     {
         return $this->model
             ->where('slug', $slug)
-            ->whereHas('products', function ($query) {
-                $query->where('status', 'accepted');
-            })
             ->with(['products' => function ($query) {
-                $query->where('status', 'accepted'); // Chỉ load sản phẩm có status accepted
+                $query->where('status', 'accepted');
             }])
             ->firstOrFail();
-
-
     }
 
 

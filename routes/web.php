@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryPostController;
 use App\Http\Controllers\Admin\CategoryProductController;
 use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Exchange\FavoriteController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\SocialLoginController;
@@ -85,6 +86,8 @@ Route::get('/filter-by', [HomePageController::class, 'filter'])->name('products.
 Route::get('/products/load-more', [HomePageController::class, 'loadMore'])->name('exchange.loadMore');
 
 Route::middleware(['auth.exchange'])->group(function () {
+    Route::post('/favorite/{product}', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
+
     // Profile
     Route::get('/user/{encodedId}/profile', [ExchangeUserController::class, 'profilePost'])->name('exchange.profilePost');
     Route::get('/user/profile', [ExchangeUserController::class, 'profile'])->name('exchange.profile');
@@ -115,6 +118,7 @@ Route::middleware(['auth.exchange'])->group(function () {
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{conversation}/send', [ChatController::class, 'send'])->name('chat.send');
 
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('exchange.favorites');
     // Fallback cho exchange
     Route::fallback(function () {
         return response()->view('errors.404-exchange', [], 404);
@@ -137,6 +141,7 @@ Route::post('/register/', [AuthController::class, 'storeUser'])->name('storeUser
 Route::get('/setLocale/{locale}/', [HomeController::class, 'changeLocate'])->name('app.setLocale');
 
 Route::middleware(['auth:sanctum'])->group(function () {
+
     Route::get('/tournament-league/{slug}/register', [HomeController::class, 'formRegisterLeague'])->name('league.formRegisterLeague');
     Route::get('/tournament-league/{slug}/register-league/', [HomeController::class, 'registerLeague'])->name('registerLeague.info');
     //profile
