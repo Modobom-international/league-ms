@@ -47,14 +47,13 @@ class ChatController extends Controller
     public function chatWithSeller($productId)
     {
         $product = $this->productRepository->show($productId);
-        $user =Auth::guard('canstum')->user();
+        $user = Auth::guard('canstum')->user();
 
         // Tìm conversation đã tồn tại (có thể là buyer hoặc seller)
         $conversation = $this->conversationRepository->getConversation($product, $user);
 
         // Nếu chưa có thì tạo mới (chỉ nếu user không phải là chủ sản phẩm)
         if (!$conversation) {
-
             $dataCreate = [
                 'product_id' => $product->id,
                 'buyer_id' => $user->id,
@@ -62,11 +61,12 @@ class ChatController extends Controller
             ];
 
             $this->conversationRepository->createConversation($dataCreate);
+
+            // Gán lại để lấy conversation mới tạo
+            $conversation = $this->conversationRepository->getConversation($product, $user);
         }
 
         // Lấy danh sách tất cả cuộc trò chuyện liên quan đến user
-        $conversations = $this->conversationRepository->getByUser($user);
-
         $conversations = Conversation::where('buyer_id', $user->id)
             ->orWhere('seller_id', $user->id)
             ->with([
@@ -81,6 +81,7 @@ class ChatController extends Controller
             })
             ->values(); // reset lại index
 
+        // Lấy toàn bộ tin nhắn của conversation hiện tại
         $messages = $conversation->messages()->orderBy('created_at')->get();
 
         return view('exchange.chat.show', compact(

@@ -103,10 +103,11 @@
                     {{ __('Updated') }} {{ $product->updated_at->diffForHumans() }}
                 </div>
 
-                @php $isLoggedIn = Auth::guard('canstum')->check(); @endphp
+                @php $isLoggedIn = Auth::guard('canstum')->check();
+                @endphp
 
                 <div class="mt-4 flex space-x-2">
-                    @if($isLoggedIn && auth()->id() !== $product->user_id || !$isLoggedIn)
+                    @if( Auth::guard('canstum')->id()!== $product->user_id )
                         <button
                             id="showPhoneBtn"
                             class="flex-1 text-center border border-gray-300 px-4 py-2 rounded-lg text-lg font-semibold hover:bg-gray-100"
@@ -118,7 +119,7 @@
                             class="flex-1 text-center bg-green-500 text-white px-4 py-2 rounded-lg text-lg font-semibold hover:bg-green-600">
                             💬 Chat
                         </a>
-                    @elseif($isLoggedIn && auth()->id() == $product->user_id)
+                    @elseif($isLoggedIn && Auth::guard('canstum')->id()== $product->user_id)
                         <div class=" w-full">
                             <div class="flex w-full gap-2">
                                 <!-- Nút Delete -->
@@ -214,9 +215,11 @@
                             </a>
                         </div>
                         <div>
-                            <div class="font-semibold text-gray-900">{{ $product->users->name }}</div>
-                            <div class="text-sm text-gray-600">Phản hồi: -- <a href="#"
-                                                                               class="text-blue-600 underline">{{ 1 }} đã bán</a></div>
+                            <a href="{{ route('exchange.profilePost', Hashids::encode($product->users->id)) }}">
+                                <div class="font-semibold text-gray-900">{{ $product->users->name }}</div>
+                            </a>
+                            <div class="text-sm text-gray-600">{{__("Reply")}}: -- <a href="#"
+                                                                               class="text-blue-600 underline">{{ 1 }} {{__('Sold')}}</a></div>
                             <div class="text-sm text-gray-500 flex items-center space-x-1">
                                 <span class="w-2 h-2 bg-gray-400 rounded-full inline-block"></span>
                                 <span>{{ __('Active') }}</span>
@@ -233,11 +236,11 @@
                 <!-- Modal đăng nhập -->
                 <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
-                        <h2 class="text-xl font-bold mb-4">{{ __('You need to login to view phone number') }}</h2>
+                        <h2 class="text-lg font-bold mb-4">{{ __('You need to login to view phone number') }}</h2>
                         <p class="mb-4 text-gray-600">{{ __("Please login to continue") }}.</p>
                         <div class="flex justify-end space-x-2">
                             <button onclick="closeLoginModal()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">{{ __("Cancel") }}</button>
-                            <a href="{{ route('login') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">{{ __("Login") }}</a>
+                            <a href="{{ route('exchange.LoginForm') }}" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">{{ __("Login") }}</a>
                         </div>
                     </div>
                 </div>
@@ -305,10 +308,23 @@
                             {{-- Nội dung --}}
                             <div class="flex flex-col justify-between flex-grow mt-3 space-y-1">
                                 <h3 class="text-base font-semibold line-clamp-2">{{ $related->name }}</h3>
-                                <p class="text-gray-500 text-sm">{{ $related->condition === 'new' ? 'Mới' : 'Đã sử dụng' }}</p>
+                                <p class="text-gray-500 text-sm">  {{ \Illuminate\Support\Str::limit($related->description, 80, ' [...]') }}</p>
                                 <p class="text-red-500 font-bold">{{ number_format($related->price, 0, ',', '.') }} đ</p>
-                                <p class="text-sm text-gray-600">📍 {{ $related->location }}</p>
+
+                                {{-- Location và avatar cùng dòng --}}
+                                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                                    @if ($related->users->profile_photo_path)
+                                        <img src="{{ asset($related->users->profile_photo_path) }}" class="w-8 h-8 rounded-full shadow object-cover" />
+                                    @else
+                                        <div class="w-8 h-8 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-semibold shadow">
+                                            {{ strtoupper(substr($related->users->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+
+                                    <span class="text-gray-500">📍 {{ $related->location }}</span>
+                                </div>
                             </div>
+
                         </a>
                     </div>
                 @endforeach

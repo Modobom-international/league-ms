@@ -124,6 +124,14 @@
                                                 <span>📍 {{ $product->location }}</span>
                                             </div>
                                             <div class="product-updated flex items-center text-gray-700 mt-1">
+                                                @if ($product->users->profile_photo_path)
+                                                    <img src="{{ asset($product->users->profile_photo_path) }}" class="w-8 h-8 rounded-full shadow object-cover" />
+                                                @else
+                                                    <div class="w-5 h-5 bg-blue-500 text-white text-sm rounded-full flex items-center justify-center font-semibold shadow">
+                                                        {{ strtoupper(substr($product->users->name, 0, 1)) }}
+                                                    </div>
+                                                    @endif
+                                                    &ensp;.&ensp;
                                                 <i class="fas fa-clock mr-2"></i>
                                                 {{ __('Updated') }} {{ $product->updated_at->diffForHumans() }}
                                             </div>

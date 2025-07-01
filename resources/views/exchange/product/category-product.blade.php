@@ -82,19 +82,24 @@
                     @foreach ($products as $product)
                         <div class="border rounded-xl  hover:shadow-md transition flex overflow-hidden p-5">
                             <!-- Hình ảnh -->
-                            <div class="w-32 sm:w-40 md:w-48 h-28 sm:h-32 md:h-36 flex-shrink-0">
+                            <div class="w-32 sm:w-40 md:w-48 h-28 sm:h-32 md:h-36 flex-shrink-0 relative">
                                 @php
                                     $images = json_decode($product->images, true) ?? [];
-                                    $mainImage = $images[0] ?? '/images/no-image.png'; // ảnh mặc định nếu không có
+                                    $mainImage = $images[0] ?? '/images/no-image.png';
+                                    $isFavorited = Auth::check() && Auth::user()->hasFavorited($product->id);
                                 @endphp
                                 <img src="{{ asset($mainImage) }}" alt="{{ $product->name }}"
-                                    class="w-full h-full object-cover rounded-l-xl">
+                                     class="w-full h-full object-cover rounded-l-xl">
+
+
                             </div>
+
                             <!-- Nội dung -->
-                            <div class="flex flex-col justify-between p-3 w-full">
+                            <div class="relative flex flex-col justify-between p-3 w-full">
+
                                 <div>
                                     <a href="{{ route('exchange.productDetail', $product->slug) }}"
-                                        class="block font-semibold text-xl text-gray-900 hover:text-yellow-500 line-clamp-1 text-xxl">
+                                       class="block font-semibold text-xl text-gray-900 hover:text-yellow-500 line-clamp-1 text-xxl pr-10">
                                         {{ $product->name }}
                                     </a>
                                     <h2 class="text-red-600 font-bold text-xl mt-1">
@@ -103,16 +108,38 @@
                                 </div>
 
                                 <!-- Mô tả ngắn -->
-                                <p class="">
+                                <p class="mt-1">
                                     {{ Str::limit(strip_tags($product->description), 100, '...') }}
                                 </p>
-                                <!-- Địa điểm -->
-                                <span class="mt-2">
-                                    <i class="fas fa-clock text-gray-500 mr-2"></i>
-                                    {{ __('Updated') }} {{ $product->updated_at->diffForHumans() }} 📍
-                                    {{ $product->location }}
-                                </span>
+
+                                <!-- Địa điểm + Chat + Yêu thích -->
+                                <div class="mt-3 flex items-center justify-between flex-wrap gap-2">
+                                    <!-- Địa điểm -->
+                                    <span class="text-sm text-gray-600 flex items-center">
+            <i class="fas fa-clock text-gray-500 mr-2"></i>
+            {{ __('Updated') }} {{ $product->updated_at->diffForHumans() }} 📍
+            {{ $product->location }}
+        </span>
+
+                                    <div class="flex items-center gap-2">
+                                        <!-- Nút Chat -->
+                                        <a href="{{ route('chat.withSeller', ['product' => $product->id]) }}"
+                                           class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-600">
+                                            💬 Chat
+                                        </a>
+
+                                        <!-- Nút yêu thích -->
+                                        <button
+                                            class="favorite-btn toggle-favorite-btn bg-white bg-opacity-80 rounded-full p-2 shadow-md text-lg transition-colors duration-200"
+                                            data-product-id="{{ $product->id }}"
+                                            id="favorite-btn-{{ $product->id }}"
+                                        >
+                                            <i class="fas fa-heart {{ $isFavorited ? 'text-red-500' : 'text-gray-400 hover:text-red-500' }}"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
                     @endforeach
                 @else
@@ -128,3 +155,40 @@
         </div>
     </div>
 @endsection
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.toggle-favorite-btn').click(function () {
+            let button = $(this);
+            let productId = button.data('product-id');
+            let csrfToken = $('meta[name="csrf-token"]').attr('content');
+            let icon = button.find('i'); // 🔥 Lấy icon bên trong nút
+
+            $.ajax({
+                url: '/favorite/' + productId,
+                type: 'POST',
+                dataType: 'json',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function (data) {
+                    if (data.favorited) {
+                        icon.removeClass('text-gray-400 hover:text-red-500').addClass('text-red-500');
+                    } else {
+                        icon.removeClass('text-red-500').addClass('text-gray-400 hover:text-red-500');
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.status === 401) {
+                        window.location.href = '/exchange-login';
+                    } else {
+                        console.error('Lỗi AJAX:', xhr.responseText);
+                    }
+                }
+            });
+        });
+    });
+</script>

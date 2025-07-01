@@ -65,16 +65,15 @@ class ExchangeController extends Controller
 
     public function productDetail($slug)
     {
-        $categories = $this->categoryProductRepository->index();
         $product = $this->productRepository->productDetail($slug);
 
         if(!$product) {
             return redirect()->route('exchange.home')->with('success', 'Product not found!');
         }
 
-        $relatedProducts = Product::where('category', $product->category)->where('slug', '!=', $slug)->limit(6)->get();
+        $relatedProducts = $this->productRepository->relateProduct($product, $slug);
 
-        return view('exchange.product.show', compact('product', 'relatedProducts', 'categories'));
+        return view('exchange.product.show', compact('product', 'relatedProducts'));
     }
     /**
      * Show the form for creating a new resource.

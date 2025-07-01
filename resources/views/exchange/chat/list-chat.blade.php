@@ -24,8 +24,13 @@
                 display: flex !important;
             }
         }
+
+        .chat-height {
+            height: 80vh;
+        }
+
     </style>
-    <div class="container mx-auto max-w-screen-lg bg-white mt-4 flex h-screen">
+    <div class="container mx-auto max-w-screen-lg bg-white mt-4 flex chat-height ">
         <!-- Danh sách cuộc trò chuyện -->
         <div class="sidebar w-1/3 border-r border-gray-300 overflow-y-auto">
             <div class="px-4 pb-2 mt-4">

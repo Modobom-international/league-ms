@@ -17,6 +17,11 @@ class ProductRepository extends BaseRepository
         return $this->model->with('categories', 'brands')->orderBy('created_at', 'desc')->get();
     }
 
+    public function relateProduct($product, $slug)
+    {
+        return $this->model->with( 'categories', 'productImages', 'users')->where('category', $product->category)->where('slug', '!=', $slug)->limit(6)->get();
+    }
+
     public function productCategory($category)
     {
         return $this->model->with('categories', 'brands')->where('category', $category)->orderBy('created_at', 'desc')->paginate(10);
@@ -136,7 +141,7 @@ class ProductRepository extends BaseRepository
 
     public function homeExchange()
     {
-        return $this->model->with('categories', 'brands')
+        return $this->model->with('categories', 'brands', 'users')
             ->where('is_sold', \App\Enums\Product::PRODUCT_IN_STOCK)
             ->where('status', \App\Enums\Product::STATUS_POST_ACCEPT)
             ->orderBy('created_at', 'desc') ->take(9)->get();
@@ -151,7 +156,7 @@ class ProductRepository extends BaseRepository
 
     public function recommend($excludeIds)
     {
-        return $this->model->with('categories', 'brands')->whereNotIn('id', $excludeIds)
+        return $this->model->with('categories', 'brands', 'users')->whereNotIn('id', $excludeIds)
             ->inRandomOrder()
             ->take(8)
             ->get();

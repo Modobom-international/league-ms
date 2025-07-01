@@ -62,8 +62,12 @@
                 width: 66.6666%; /* 2/3 */
             }
         }
+
+        .chat-height {
+            height: 80vh;
+        }
     </style>
-    <div class="container mx-auto max-w-screen-lg flex h-screen bg-white mt-4">
+    <div class="container mx-auto max-w-screen-lg flex chat-height bg-white mt-4">
         <!-- Sidebar -->
         <div class="sidebar w-1/3 border-r border-gray-300 overflow-y-auto">
             <div class="px-4 pb-2 mt-4">
@@ -123,8 +127,10 @@
                                  alt="avatar">
                         </div>
                         <div class="ml-4">
-                            <div class="text-sm text-black-600">{{ $partner->name }}</div>
-                            <div class="font-semibold text-black-600">đang hoạt động</div>
+                            <a href="{{ route('exchange.profilePost', Hashids::encode($product->users->id)) }}">
+                                <div class="text-sm text-black-600">{{ $partner->name }}</div>
+                            </a>
+                            <div class="font-semibold text-black-600">{{__("Active")}}</div>
                         </div>
                     </div>
                 </div>
@@ -154,7 +160,7 @@
                                 onclick="openModal({{ $product->id }})"
                                 class="bg-gray-500 hover:~bg-gray-500/5-600 text-white text-xs px-3 py-1 rounded-lg"
                             >
-                                Đã bán / Ẩn tin
+                                {{__("Sold/Hide")}}
                             </button>
                         @endif
                         @endif
@@ -267,12 +273,12 @@
                     <div class="flex items-center gap-2">
                         <input type="text" id="chatInput" name="content" placeholder="Nhập tin nhắn"
                                class="flex-1 px-4 py-2 border rounded-full">
-                        <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded-full">Gửi</button>
+                        <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded-full">{{__("Send")}}</button>
                     </div>
                 </form>
             @else
                 <div class="flex items-center justify-center flex-1">
-                    <p class="text-black-500">Chọn một cuộc trò chuyện để bắt đầu.</p>
+                    <p class="text-black-500">{{__("Choose an other conversation to start")}}</p>
                 </div>
             @endif
         </div>
